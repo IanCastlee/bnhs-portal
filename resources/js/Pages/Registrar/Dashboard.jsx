@@ -1,21 +1,8 @@
-import React from "react";
 import { Head, Link } from "@inertiajs/react";
 import PortalLayout from "@/Layouts/PortalLayout";
 import Card from "@/Components/Atoms/Card";
-import Badge from "@/Components/Atoms/Badge";
-import Button from "@/Components/Atoms/Button";
 import { useAuth } from "@/Hooks/useAuth";
-import {
-    UserCheck,
-    FileCheck,
-    School,
-    Layers,
-    CheckCircle2,
-    Clock,
-    ArrowRight,
-    Users,
-    GraduationCap,
-} from "lucide-react";
+import { FileCheck, CheckCircle2, Clock, ArrowRight } from "lucide-react";
 
 export default function RegistrarDashboard() {
     const { user } = useAuth();
@@ -31,9 +18,12 @@ export default function RegistrarDashboard() {
                         <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-xs font-semibold backdrop-blur-md mb-2">
                             📋 DepEd Admission, Verification & SF10 Custodian
                         </span>
-                        <h2 className="text-2xl font-black">Registrar Office Dashboard</h2>
+                        <h2 className="text-2xl font-black">
+                            Registrar Office Dashboard
+                        </h2>
                         <p className="text-emerald-100 text-xs mt-1 font-medium">
-                            Review BEEF student applications, assign sections & advisers, and approve quarterly grades.
+                            Review BEEF student applications, assign sections &
+                            advisers, and approve quarterly grades.
                         </p>
                     </div>
                 </div>
@@ -55,11 +45,16 @@ export default function RegistrarDashboard() {
                             </div>
                         </div>
                         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                            <Link href="/registrar/enrollments" className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 group">
+                            <Link
+                                href="/registrar/enrollments"
+                                className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 group"
+                            >
                                 <span>Review applications</span>
                                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                             </Link>
-                            <span className="text-[10px] text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-md">Action Required</span>
+                            <span className="text-[10px] text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-md">
+                                Action Required
+                            </span>
                         </div>
                     </Card>
 
@@ -79,7 +74,9 @@ export default function RegistrarDashboard() {
                         </div>
                         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                             <span>24 Sections Assigned</span>
-                            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md">100% Placed</span>
+                            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md">
+                                100% Placed
+                            </span>
                         </div>
                     </Card>
 
@@ -98,11 +95,16 @@ export default function RegistrarDashboard() {
                             </div>
                         </div>
                         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                            <Link href="/registrar/grades" className="text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center gap-1 group">
+                            <Link
+                                href="/registrar/grades"
+                                className="text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center gap-1 group"
+                            >
                                 <span>Open SF10 Approval</span>
                                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                             </Link>
-                            <span className="text-[10px] text-slate-400 font-medium">Q1 Masterlist</span>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                                Q1 Masterlist
+                            </span>
                         </div>
                     </Card>
                 </div>

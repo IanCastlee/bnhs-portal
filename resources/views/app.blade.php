@@ -6,10 +6,10 @@
 
         <title inertia>{{ config('app.name', 'BNHS Portal') }}</title>
 
-        <!-- Google Fonts: Plus Jakarta Sans / Inter -->
+        <!-- Google Fonts: Geist Sans & Geist Mono (Modern Crisp Tech Typography) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
 
         <!-- Scripts & Styles -->
         @viteReactRefresh
@@ -17,7 +17,7 @@
         @inertiaHead
         <style>
             body {
-                font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             }
         </style>
     </head>

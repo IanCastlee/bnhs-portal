@@ -11,9 +11,13 @@ import {
     LogOut,
 } from "lucide-react";
 
-export default function StudentMobileLayout({ children, title = "Student Portal" }) {
+export default function StudentMobileLayout({
+    children,
+    title = "Student Portal",
+}) {
     const { user } = useAuth();
-    const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+    const currentPath =
+        typeof window !== "undefined" ? window.location.pathname : "";
 
     // 📱 Mobile Bottom Navigation Tabs
     const tabs = [
@@ -37,8 +41,12 @@ export default function StudentMobileLayout({ children, title = "Student Portal"
                         B
                     </div>
                     <div>
-                        <h1 className="text-xs font-black tracking-wider uppercase">Bulusan NHS</h1>
-                        <p className="text-[10px] text-amber-400 font-mono">LRN: {user?.lrn || "102938475612"}</p>
+                        <h1 className="text-xs font-black tracking-wider uppercase">
+                            Bulusan NHS
+                        </h1>
+                        <p className="text-[10px] text-amber-400 font-mono">
+                            LRN: {user?.lrn || "102938475612"}
+                        </p>
                     </div>
                 </div>
 
@@ -57,9 +65,7 @@ export default function StudentMobileLayout({ children, title = "Student Portal"
             </header>
 
             {/* 📱 Main Scrollable Feed Content */}
-            <main className="flex-1 p-4 pb-24 overflow-y-auto">
-                {children}
-            </main>
+            <main className="flex-1 p-4 pb-24 overflow-y-auto">{children}</main>
 
             {/* 📱 Fixed Bottom Navigation Bar */}
             <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200 z-50 px-2 py-1.5 flex justify-around items-center shadow-lg">
@@ -75,8 +81,12 @@ export default function StudentMobileLayout({ children, title = "Student Portal"
                                     : "text-slate-400 hover:text-slate-600 font-medium"
                             }`}
                         >
-                            <tab.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-2"}`} />
-                            <span className="text-[10px] mt-0.5">{tab.name}</span>
+                            <tab.icon
+                                className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-2"}`}
+                            />
+                            <span className="text-[10px] mt-0.5">
+                                {tab.name}
+                            </span>
                         </Link>
                     );
                 })}

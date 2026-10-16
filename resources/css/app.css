@@ -1,1 +1,93 @@
 @import "tailwindcss";
+
+@theme {
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'Geist Mono', monospace;
+}
+
+:root, html, body {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 🌿 Universal Focus & Modern Styling for Text Fields across Whole Project */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+textarea,
+select {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+/* 🟢 Crisp Emerald Green Glow on Focus */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]):focus,
+textarea:focus,
+select:focus {
+    border-color: #059669 !important; /* emerald-600 */
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22) !important; /* emerald-500/22 */
+    outline: none !important;
+}
+
+/* Error state override */
+input.border-rose-300:focus,
+input.border-rose-400:focus,
+input.border-rose-500:focus,
+textarea.border-rose-300:focus,
+textarea.border-rose-400:focus,
+textarea.border-rose-500:focus {
+    border-color: #e11d48 !important;
+    box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.20) !important;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.animate-shake {
+    animation: shake 0.4s ease-in-out;
+}
+
+/* 🧼 Clean Hide Scrollbar Utility (Preserves full scrolling functionality) */
+.no-scrollbar::-webkit-scrollbar,
+::-webkit-scrollbar {
+    display: none;
+    width: 0px;
+    height: 0px;
+}
+
+.no-scrollbar,
+html,
+body {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* 🖨️ Clean Official DepEd Print Styling */
+@media print {
+    /* Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Only show the official Admission Print Slip container and its contents */
+    #admission-print-slip,
+    #admission-print-slip * {
+        visibility: visible;
+    }
+
+    #admission-print-slip {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: white !important;
+        color: black !important;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 12mm;
+    }
+}

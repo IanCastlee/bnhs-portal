@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // 🌐 Trust Proxies (Cloudflare, Nginx, Load Balancers para sa totoong Client IP)
+        $middleware->trustProxies(at: '*');
+
         // 🛡️ Global Web Middleware
         $middleware->web(append: [
             'throttle:global',

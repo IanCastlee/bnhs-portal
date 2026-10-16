@@ -6,13 +6,14 @@ use App\Modules\Identity\Enums\UserRole;
 use App\Modules\Enrollment\Models\Enrollment;
 use App\Modules\Academic\Models\Section;
 use App\Modules\Grading\Models\Grade;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -68,5 +69,11 @@ class User extends Authenticatable
     public function studentGrades(): HasMany
     {
         return $this->hasMany(Grade::class, 'student_id');
+    }
+
+    public function assignedGradeLevels(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\App\Modules\Academic\Models\GradeLevel::class, 'registrar_grade_levels', 'user_id', 'grade_level_id')
+            ->withTimestamps();
     }
 }

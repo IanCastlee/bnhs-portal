@@ -22,4 +22,10 @@ class GradeLevel extends Model
     {
         return $this->hasMany(Subject::class);
     }
+
+    public function assignedRegistrars(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\App\Modules\Identity\Models\User::class, 'registrar_grade_levels', 'grade_level_id', 'user_id')
+            ->withTimestamps();
+    }
 }

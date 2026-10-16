@@ -51,11 +51,15 @@ class AnnouncementController extends Controller
      */
     public function store(Request $request, CloudinaryService $cloudinary): RedirectResponse
     {
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(180);
+        }
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'caption' => ['required', 'string'],
             'tag' => ['required', 'string', 'in:General,Academics,Events,Urgent'],
-            'image' => ['nullable', 'image', 'max:5120'], // Max 5MB
+            'image' => ['nullable', 'image', 'max:10240'], // Allow up to 10MB
             'is_pinned' => ['boolean'],
         ]);
 
@@ -86,11 +90,15 @@ class AnnouncementController extends Controller
      */
     public function update(Request $request, Announcement $announcement, CloudinaryService $cloudinary): RedirectResponse
     {
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(180);
+        }
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'caption' => ['required', 'string'],
             'tag' => ['required', 'string', 'in:General,Academics,Events,Urgent'],
-            'image' => ['nullable', 'image', 'max:5120'],
+            'image' => ['nullable', 'image', 'max:10240'],
             'is_pinned' => ['boolean'],
         ]);
 

@@ -29,6 +29,7 @@ class Enrollment extends Model
         'previous_school',
         'general_average',
         'documents',
+        'is_complete',
         'status',
         'reviewed_by',
         'remarks',
@@ -39,9 +40,19 @@ class Enrollment extends Model
         'birthdate' => 'date',
         'general_average' => 'decimal:2',
         'documents' => 'array',
+        'is_complete' => 'boolean',
         'status' => EnrollmentStatus::class,
         'reviewed_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Enrollment $enrollment) {
+            $hasGuardian = !empty(trim((string) $enrollment->guardian_name));
+            $hasAddress = !empty(trim((string) $enrollment->address));
+            $enrollment->is_complete = $hasGuardian && $hasAddress;
+        });
+    }
 
     public function student(): BelongsTo
     {

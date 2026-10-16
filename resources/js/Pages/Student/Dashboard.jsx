@@ -3,7 +3,8 @@ import { Head, Link } from "@inertiajs/react";
 import StudentLayout from "@/Layouts/StudentLayout";
 import Card from "@/Components/Atoms/Card";
 import Badge from "@/Components/Atoms/Badge";
-import AnnouncementCard from "@/Components/Organisms/AnnouncementCard";
+import AnnouncementCard from "@/Components/Organisms/Student/Announcements/AnnouncementCard";
+import AdmissionQueueBanner from "@/Components/Organisms/Student/AdmissionQueueBanner";
 import { useAuth } from "@/Hooks/useAuth";
 import { formatLRN } from "@/Utils/formatters";
 import {
@@ -12,11 +13,26 @@ import {
     UserCheck,
     Sparkles,
     BookOpen,
+    Clock,
+    Ticket,
 } from "lucide-react";
 
-export default function StudentDashboard({ announcements = [] }) {
+export default function StudentDashboard({ announcements = [], enrollment = null, queuePosition = null }) {
     const { user } = useAuth();
     const feedList = Array.isArray(announcements) ? announcements : (announcements?.data || []);
+
+    const isPending = enrollment ? enrollment.status === "PENDING_REVIEW" : false;
+    const isEnrolled = enrollment ? enrollment.status === "APPROVED" && enrollment.section_id : true;
+
+    const sectionName = isPending
+        ? "Grade 7 • For Sectioning"
+        : (enrollment?.section?.name
+            ? `Grade ${enrollment?.grade_level?.level || 7} • Section ${enrollment.section.name}`
+            : "Grade 7 • Section Rizal");
+
+    const adviserName = isPending
+        ? "Pending Registrar Evaluation"
+        : (enrollment?.section?.adviser?.name || "Mrs. Maria Santos");
 
     const todayClasses = [
         { subject: "General Mathematics", teacher: "Mrs. Maria Santos", time: "8:00 AM - 9:00 AM", room: "Room 102" },
@@ -29,23 +45,55 @@ export default function StudentDashboard({ announcements = [] }) {
         <StudentLayout title="Student Feed & Dashboard">
             <Head title="Student Portal - Bulusan NHS" />
 
-            <div className="space-y-6">
-                {/* 🌟 BNHS Green Student Welcome Banner */}
-                <div className="bg-gradient-to-r from-[#0f4c3a] via-[#107050] to-[#0d5c43] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+            <div className="space-y-4 sm:space-y-6">
+                {/* 🎟️ Real-Time Admission Queue Notification Banner (Kapag bago/pending pa lang) */}
+                {isPending && (
+                    <AdmissionQueueBanner
+                        enrollment={enrollment}
+                        queuePosition={queuePosition}
+                    />
+                )}
+
+                {/* 🌟 BNHS Green Student Welcome Banner (Maximized on Mobile) */}
+                <div className="-mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] rounded-b-3xl sm:rounded-2xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border-b sm:border border-emerald-400/20">
+                    {/* Ambient Glows */}
+                    <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
+                    <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-teal-400/15 rounded-full blur-2xl pointer-events-none" />
+
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="text-[11px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-1 rounded-md backdrop-blur-xs">
-                                    Grade 7 • Section Rizal
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
+                                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-xs shadow-2xs">
+                                    {sectionName}
                                 </span>
-                                <Badge variant="success" className="bg-emerald-400 text-slate-950 font-black border-none text-xs">
-                                    ENROLLED
-                                </Badge>
+
+                                {isPending ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 shadow-2xs">
+                                        <Clock className="w-3 h-3" />
+                                        QUEUE: {enrollment?.tracking_number || "BNHS-Q001"}
+                                    </span>
+                                ) : (
+                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-400 text-slate-950 shadow-2xs">
+                                        ENROLLED
+                                    </span>
+                                )}
+
+                                <span className="text-[10px] sm:text-xs font-semibold text-emerald-200 bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                                    S.Y. 2026-2027
+                                </span>
                             </div>
-                            <h2 className="text-xl md:text-2xl font-black">Kamusta, {user?.name}! 👋</h2>
-                            <p className="text-emerald-100 text-xs md:text-sm mt-1">
-                                Class Adviser: <span className="font-bold text-white underline">Mrs. Maria Santos</span> • LRN: <span className="font-mono font-bold text-emerald-300">{formatLRN(user?.lrn || "102938475612")}</span>
-                            </p>
+                            <h2 className="text-lg sm:text-2xl font-black tracking-tight text-white drop-shadow-xs">
+                                Kamusta, {user?.name || "Juan Dela Cruz"}! 👋
+                            </h2>
+                            <div className="text-emerald-100 text-xs sm:text-sm mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <span>
+                                    Class Adviser: <strong className="font-bold text-white">{adviserName}</strong>
+                                </span>
+                                <span className="text-emerald-300/40 hidden sm:inline">•</span>
+                                <span>
+                                    LRN: <strong className="font-mono font-bold text-emerald-300 bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-500/20">{formatLRN(user?.lrn || "102938475612")}</strong>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -9,23 +9,24 @@ export default function AnnouncementCard({ post }) {
 
     return (
         <article className="w-full bg-white rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 overflow-hidden">
-            {/* 🖼️ Full-Bleed Edge-to-Edge Image */}
+            {/* 🖼️ Full Image Display (Zero Cropping - Natural Aspect Ratio) */}
             {post.image_url && (
-                <div className="w-full aspect-[16/9] sm:aspect-[2/1] max-h-56 sm:max-h-80 bg-slate-900 overflow-hidden relative flex items-center justify-center">
+                <div className="w-full bg-slate-950/5 relative overflow-hidden flex items-center justify-center border-b border-slate-100">
                     <img
                         src={post.image_url}
                         alt={post.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto max-h-[650px] object-contain block"
                         loading="lazy"
                     />
                     {/* Tags overlay */}
-                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex items-center gap-1.5 z-10">
+                    <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex items-center gap-1.5 z-10">
                         <span className="text-[9px] sm:text-[10px] font-bold text-white bg-slate-950/75 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/15 shadow-sm">
                             {post.tag}
                         </span>
                         {post.is_pinned && (
                             <span className="text-[9px] sm:text-[10px] font-black text-slate-950 bg-amber-400 px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 border border-amber-300">
-                                <Pin className="w-2.5 h-2.5 fill-slate-950" /> PINNED
+                                <Pin className="w-2.5 h-2.5 fill-slate-950" />{" "}
+                                PINNED
                             </span>
                         )}
                     </div>
@@ -41,7 +42,8 @@ export default function AnnouncementCard({ post }) {
                         </span>
                         {post.is_pinned && (
                             <span className="text-[9px] sm:text-[10px] font-black text-slate-950 bg-amber-400 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                <Pin className="w-2.5 h-2.5 fill-slate-950" /> PINNED
+                                <Pin className="w-2.5 h-2.5 fill-slate-950" />{" "}
+                                PINNED
                             </span>
                         )}
                     </div>
@@ -65,15 +67,22 @@ export default function AnnouncementCard({ post }) {
                             {post.author?.name?.charAt(0) || "A"}
                         </div>
                         <div className="text-[10px] sm:text-xs truncate flex items-center gap-1 min-w-0">
-                            <span className="text-slate-400 font-normal shrink-0">By</span>
-                            <span className="font-semibold text-slate-700 truncate">{post.author?.name || "System Admin"}</span>
+                            <span className="text-slate-400 font-normal shrink-0">
+                                By
+                            </span>
+                            <span className="font-semibold text-slate-700 truncate">
+                                {post.author?.name || "System Admin"}
+                            </span>
                         </div>
                     </div>
 
                     {/* Clean Pill Timestamp */}
                     <div
                         className="flex items-center gap-1 text-[9px] sm:text-[10px] text-slate-400 font-medium whitespace-nowrap bg-slate-50 border border-slate-200/60 px-2 py-0.5 rounded-full shrink-0"
-                        title={formatDate(post.created_at, { hour: "2-digit", minute: "2-digit" })}
+                        title={formatDate(post.created_at, {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}
                     >
                         <Clock className="w-2.5 h-2.5 text-slate-400 shrink-0" />
                         <span>{formatRelativeTime(post.created_at)}</span>

@@ -1,14 +1,42 @@
-import React from "react";
-import { Head, Link } from "@inertiajs/react";
+import React, { useState } from "react";
+import { Head, Link, router } from "@inertiajs/react";
 import PortalLayout from "@/Layouts/PortalLayout";
-import Card from "@/Components/Atoms/Card";
-import Badge from "@/Components/Atoms/Badge";
-import Button from "@/Components/Atoms/Button";
+import Card from "@/Components/Atoms/Common/Card";
+import Badge from "@/Components/Atoms/Common/Badge";
+import Button from "@/Components/Atoms/Common/Button";
 import { useAuth } from "@/Hooks/useAuth";
-import { FileSpreadsheet, Users, Clock, Send, Sparkles, CheckCircle2 } from "lucide-react";
+import {
+    FileSpreadsheet,
+    Users,
+    Clock,
+    Sparkles,
+    CheckCircle2,
+    BookOpen,
+    GraduationCap,
+    ArrowRight,
+    Search,
+    ShieldAlert,
+} from "lucide-react";
 
-export default function TeacherDashboard() {
+export default function TeacherDashboard({
+    advisorySections = [],
+    allSections = [],
+    subjects = [],
+    activeYear = null,
+    stats = {},
+}) {
     const { user } = useAuth();
+    const [selectedSectionId, setSelectedSectionId] = useState(allSections[0]?.id || "");
+    const [selectedSubjectId, setSelectedSubjectId] = useState(subjects[0]?.id || "");
+
+    const handleOpenGradeSheet = (e) => {
+        e.preventDefault();
+        if (!selectedSectionId || !selectedSubjectId) {
+            alert("Please select both a section and a subject.");
+            return;
+        }
+        router.visit(`/teacher/sections/${selectedSectionId}/subjects/${selectedSubjectId}/grades`);
+    };
 
     return (
         <PortalLayout title="Faculty & Adviser Portal">
@@ -18,92 +46,195 @@ export default function TeacherDashboard() {
                 {/* 🌟 Welcome Card (BNHS Green) */}
                 <div className="bg-gradient-to-r from-[#0f4c3a] via-[#107050] to-[#0d5c43] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
                     <div className="relative z-10">
-                        <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-xs font-semibold backdrop-blur-md mb-2">
-                            👨‍🏫 Faculty Grade Submission & Section Advisory
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-semibold backdrop-blur-md mb-2">
+                            <GraduationCap className="w-3.5 h-3.5" />
+                            Faculty Grade Encoding & Section Advisory Portal
                         </span>
-                        <h2 className="text-2xl font-black">
+                        <h2 className="text-2xl sm:text-3xl font-black">
                             Good day, {user?.name}! 👋
                         </h2>
-                        <p className="text-emerald-100 text-xs mt-1 font-medium">
-                            Employee ID:{" "}
-                            <span className="font-mono font-bold">
-                                {user?.employee_id || "TCH-2026-042"}
-                            </span>{" "}
-                            • Advisory Class:{" "}
-                            <span className="font-bold underline">Grade 7 - Rizal</span>
+                        <p className="text-emerald-100 text-xs mt-1 font-medium flex flex-wrap items-center gap-3">
+                            <span>
+                                Employee ID:{" "}
+                                <strong className="font-mono font-bold text-white">
+                                    {user?.employee_id || "TCH-2026-042"}
+                                </strong>
+                            </span>
+                            <span>•</span>
+                            <span>
+                                Active S.Y.:{" "}
+                                <strong className="text-white">
+                                    {activeYear?.name || "2026-2027"} ({activeYear?.semester || "Full Year"})
+                                </strong>
+                            </span>
                         </p>
                     </div>
                 </div>
 
-                {/* 3-Step DepEd Approval Notice */}
-                <Card className="bg-[#1b2a47] text-white border-none shadow-md">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Sparkles className="w-5 h-5 text-emerald-400" />
-                        <h3 className="font-bold text-sm text-emerald-400 uppercase tracking-wider">
-                            DepEd 3-Step Quarterly Grade Approval Workflow
-                        </h3>
-                    </div>
-                    <p className="text-xs text-slate-300 leading-relaxed">
-                        Step 1: Direct Quarterly Grade Encoding (Subject Teacher) ➔ Step 2: Forward to Class Adviser ➔ Step 3: Adviser submits to Registrar for final publishing.
-                    </p>
-                </Card>
-
-                {/* Modern Action Cards (No cliché top borders) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card className="rounded-2xl border border-slate-200/80 hover:border-slate-300 hover:shadow-md transition-all duration-200 p-6 bg-white flex flex-col justify-between">
+                {/* 📊 Stat Counters */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black">
+                            <Users className="w-6 h-6" />
+                        </div>
                         <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded-md">
-                                    Grading Console
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                                Advisory Sections
+                            </span>
+                            <span className="text-2xl font-black text-slate-900">
+                                {stats.totalAdvisorySections || advisorySections.length}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-black">
+                            <GraduationCap className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                                Total Enrolled Students
+                            </span>
+                            <span className="text-2xl font-black text-slate-900">
+                                {stats.totalStudents || 0}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-black">
+                            <Clock className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                                Draft Grade Sheets
+                            </span>
+                            <span className="text-2xl font-black text-slate-900">
+                                {stats.pendingGradingCount || 0}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 🎯 Main Two Action Cards */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Grade Encoding Fast Console */}
+                    <Card className="rounded-2xl border border-slate-200/80 p-6 bg-white flex flex-col justify-between space-y-4">
+                        <div>
+                            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                                <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded-md">
+                                    DepEd DO 8, s. 2015
                                 </span>
-                                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-500/10">
-                                    <FileSpreadsheet className="w-5 h-5" />
-                                </div>
+                                <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
                             </div>
-                            <h3 className="text-base font-bold text-slate-900">
+                            <h3 className="text-lg font-black text-slate-900 mt-3">
                                 Encode Quarterly Grades
                             </h3>
-                            <p className="text-xs text-slate-500 mt-1 mb-4 leading-relaxed">
-                                Input Q1 to Q4 student marks for your assigned subjects (General Mathematics, Science & Tech, AP).
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                                Select a class section and subject to record quarterly marks (Q1, Q2, Q3, Q4) with automated final grade and transmutation calculation.
                             </p>
-                        </div>
-                        <Link href="/teacher/grades" className="block">
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 shadow-xs"
-                            >
-                                Open Grading Sheet &rarr;
-                            </Button>
-                        </Link>
-                    </Card>
 
-                    <Card className="rounded-2xl border border-slate-200/80 hover:border-slate-300 hover:shadow-md transition-all duration-200 p-6 bg-white flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <span className="text-[11px] font-bold text-teal-600 uppercase tracking-wider bg-teal-50 px-2.5 py-1 rounded-md">
-                                    Advisory Roster
-                                </span>
-                                <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center ring-1 ring-teal-500/10">
-                                    <Users className="w-5 h-5" />
+                            {/* Section & Subject Selectors */}
+                            <div className="space-y-3 mt-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                                        Select Target Section
+                                    </label>
+                                    <select
+                                        value={selectedSectionId}
+                                        onChange={(e) => setSelectedSectionId(e.target.value)}
+                                        className="w-full text-xs font-semibold rounded-xl border border-slate-300 px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50/50"
+                                    >
+                                        {allSections.map((sec) => (
+                                            <option key={sec.id} value={sec.id}>
+                                                {sec.grade_level?.name} - {sec.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                                        Select Learning Area / Subject
+                                    </label>
+                                    <select
+                                        value={selectedSubjectId}
+                                        onChange={(e) => setSelectedSubjectId(e.target.value)}
+                                        className="w-full text-xs font-semibold rounded-xl border border-slate-300 px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50/50"
+                                    >
+                                        {subjects.map((sub) => (
+                                            <option key={sub.id} value={sub.id}>
+                                                [{sub.code}] {sub.name} ({sub.grade_level?.name || "General"})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
-                            <h3 className="text-base font-bold text-slate-900">
-                                Class Advisory (Section Rizal)
-                            </h3>
-                            <p className="text-xs text-slate-500 mt-1 mb-4 leading-relaxed">
-                                Review masterlist attendance, quarterly rankings, and forward class grades to the Registrar.
-                            </p>
                         </div>
-                        <Link href="/teacher/advisory" className="block">
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                className="w-full font-bold border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5"
-                            >
-                                View Advisory Class &rarr;
-                            </Button>
-                        </Link>
+
+                        <Button
+                            type="button"
+                            variant="emerald"
+                            size="md"
+                            onClick={handleOpenGradeSheet}
+                            className="w-full justify-center font-black mt-4"
+                        >
+                            <span>Open Electronic Grade Sheet</span>
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                    </Card>
+
+                    {/* Section Advisory Class Roster */}
+                    <Card className="rounded-2xl border border-slate-200/80 p-6 bg-white flex flex-col justify-between space-y-4">
+                        <div>
+                            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                                <span className="text-[11px] font-bold text-teal-700 uppercase tracking-wider bg-teal-50 px-2.5 py-1 rounded-md">
+                                    Advisory Masterlist
+                                </span>
+                                <Users className="w-5 h-5 text-teal-600" />
+                            </div>
+                            <h3 className="text-lg font-black text-slate-900 mt-3">
+                                Class Advisory Rosters
+                            </h3>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                                Review official student enrollments, LRN records, emergency contacts, and approve composite class cards for Registrar submission.
+                            </p>
+
+                            <div className="mt-4 space-y-2.5">
+                                {advisorySections.length > 0 ? (
+                                    advisorySections.map((sec) => (
+                                        <div
+                                            key={sec.id}
+                                            className="p-3.5 rounded-xl border border-slate-200/70 bg-slate-50/60 flex items-center justify-between hover:bg-slate-100/80 transition-colors"
+                                        >
+                                            <div>
+                                                <h4 className="text-xs font-black text-slate-900">
+                                                    {sec.grade_level?.name} - {sec.name}
+                                                </h4>
+                                                <span className="text-[11px] text-slate-500 font-medium">
+                                                    Enrolled: <strong>{sec.enrollments_count || 0}</strong> students
+                                                </span>
+                                            </div>
+                                            <Link href={`/teacher/sections/${sec.id}/roster`}>
+                                                <Button variant="outline" size="sm">
+                                                    <span>View Roster</span>
+                                                    <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
+                                        No advisory section assigned yet. You can still encode grades for your subject classes on the left.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 text-[11px] text-slate-600 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>Adviser endorsements automatically notify the Registrar's Office.</span>
+                        </div>
                     </Card>
                 </div>
             </div>

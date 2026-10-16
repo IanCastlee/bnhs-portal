@@ -31,20 +31,40 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+            'active_academic_year' => function () {
+                return \Illuminate\Support\Facades\Cache::remember('active_academic_year_global', 3600, function () {
+                    $year = \App\Modules\Academic\Models\AcademicYear::where('is_active', true)->first(['id', 'name', 'semester', 'is_enrollment_open', 'is_grading_open']);
+                    return $year ? $year->toArray() : null;
+                });
+            },
             'auth' => [
-                'user' => $request->user() ? [
-                    'id' => $request->user()->id,
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                    'role' => $request->user()->role->value ?? (string) $request->user()->role,
-                    'lrn' => $request->user()->lrn,
-                    'employee_id' => $request->user()->employee_id,
-                    'avatar_path' => $request->user()->avatar_path,
-                ] : null,
-            ],
-            'flash' => [
-                'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
+                'user' => function () use ($request) {
+                    if (!$request->user()) return null;
+
+                    $activeYearId = \App\Modules\Academic\Models\AcademicYear::where('is_active', true)->value('id');
+
+                    $enrollmentStatus = null;
+                    if ($request->user()->role === \App\Modules\Identity\Enums\UserRole::STUDENT) {
+                        $activeEnrollment = \App\Modules\Enrollment\Models\Enrollment::where('student_id', $request->user()->id)
+                            ->when($activeYearId, fn($q) => $q->where('academic_year_id', $activeYearId))
+                            ->first();
+
+                        $enrollmentStatus = $activeEnrollment?->status?->value ?? 'NOT_ENROLLED';
+                    }
+
+                    return [
+                        'id' => $request->user()->id,
+                        'name' => $request->user()->name,
+                        'email' => $request->user()->email,
+                        'role' => $request->user()->role->value ?? (string) $request->user()->role,
+                        'lrn' => $request->user()->lrn,
+                        'employee_id' => $request->user()->employee_id,
+                        'avatar_path' => $request->user()->avatar_path,
+                        'enrollment_status' => $enrollmentStatus,
+                    ];
+                },
+                'notifications' => $request->user() ? $request->user()->unreadNotifications()->take(10)->get() : [],
+                'unread_notifications_count' => $request->user() ? $request->user()->unreadNotifications()->count() : 0,
             ],
         ];
     }
