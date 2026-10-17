@@ -9,6 +9,7 @@ use App\Modules\Identity\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -22,9 +23,11 @@ class PasswordResetController extends Controller
     /**
      * Show the forgot password form.
      */
-    public function showForgotPassword(): Response
+    public function showForgotPassword(Request $request): Response
     {
-        return Inertia::render('Auth/ForgotPassword');
+        return Inertia::render('Auth/ForgotPassword', [
+            'status' => session('status'),
+        ]);
     }
 
     /**
@@ -84,6 +87,14 @@ class PasswordResetController extends Controller
      */
     public function showResetPassword(Request $request, string $token): Response
     {
+        // Kung may kasalukuyang naka-login na session sa browser, i-logout ito
+        // upang hindi mag-conflict at makapag-set ng bagong password nang malinis
+        if (Auth::check()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
         return Inertia::render('Auth/ResetPassword', [
             'token' => $token,
             'email' => $request->query('email', ''),
@@ -123,6 +134,11 @@ class PasswordResetController extends Controller
         );
 
         if ($status === Password::PASSWORD_RESET) {
+            // Siguruhing malinis ang session at idirekta sa login gamit ang bagong password
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
             return redirect()->route('login')->with('success', 'Your password has been successfully reset! You can now sign in with your new password.');
         }
 

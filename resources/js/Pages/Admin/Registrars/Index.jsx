@@ -409,27 +409,27 @@ export default function RegistrarsIndex({ registrars = [], gradeLevels = [], sta
 
             {/* ➕ REGISTER REGISTRAR MODAL */}
             {createModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
-                    <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative my-8">
-                        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                                    <UserPlus className="w-4 h-4" />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="shrink-0 p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-white/10 text-emerald-300 flex items-center justify-center font-bold">
+                                    <UserPlus className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="font-black text-slate-900 text-base">Register New Registrar</h3>
-                                    <p className="text-xs text-slate-500 font-medium">Create staff account and assign exclusive grade partition</p>
+                                    <h3 className="font-black text-white text-base leading-tight">Register New Registrar</h3>
+                                    <p className="text-xs text-emerald-100/80 mt-0.5">Create staff account and assign exclusive grade partition</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setCreateModalOpen(false)}
-                                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleCreateSubmit} className="space-y-4 mt-4">
+                        <form onSubmit={handleCreateSubmit} className="p-6 overflow-y-auto space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                                     Full Name <span className="text-rose-500">*</span>
@@ -618,22 +618,27 @@ export default function RegistrarsIndex({ registrars = [], gradeLevels = [], sta
 
             {/* ✏️ EDIT REGISTRAR MODAL */}
             {editModalOpen && selectedRegistrar && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
-                    <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative my-8">
-                        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                            <div>
-                                <h3 className="font-black text-slate-900 text-base">Edit Registrar & Grade Level</h3>
-                                <p className="text-xs text-slate-500 font-medium">Update contact info and grade allocation</p>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="shrink-0 p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-white/10 text-emerald-300 flex items-center justify-center font-bold">
+                                    <Edit3 className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-white text-base leading-tight">Edit Registrar & Grade Level</h3>
+                                    <p className="text-xs text-emerald-100/80 mt-0.5">Update contact info and grade allocation</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setEditModalOpen(false)}
-                                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleEditSubmit} className="space-y-4 mt-4">
+                        <form onSubmit={handleEditSubmit} className="p-6 overflow-y-auto space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                                     Full Name
@@ -777,21 +782,26 @@ export default function RegistrarsIndex({ registrars = [], gradeLevels = [], sta
             {/* 🔑 RESET PASSWORD MODAL */}
             {resetPwModalOpen && selectedRegistrar && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative">
-                        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                            <div className="flex items-center gap-2">
-                                <KeyRound className="w-5 h-5 text-blue-600" />
-                                <h3 className="font-black text-slate-900 text-base">Reset Registrar Password</h3>
+                    <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="shrink-0 p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-white/10 text-emerald-300 flex items-center justify-center font-bold">
+                                    <KeyRound className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-white text-base leading-tight">Reset Registrar Password</h3>
+                                    <p className="text-xs text-emerald-100/80 mt-0.5">Set new credentials for {selectedRegistrar.name}</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setResetPwModalOpen(false)}
-                                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleResetPwSubmit} className="space-y-4 mt-4">
+                        <form onSubmit={handleResetPwSubmit} className="p-6 overflow-y-auto space-y-4">
                             <p className="text-xs text-slate-600">
                                 Resetting password for <span className="font-bold text-slate-900">{selectedRegistrar.name}</span> ({selectedRegistrar.email}).
                             </p>

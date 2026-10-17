@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm, Head, Link } from "@inertiajs/react";
+import { useForm, Head, Link, usePage } from "@inertiajs/react";
 import Button from "@/Components/Atoms/Button";
 import Input from "@/Components/Atoms/Input";
 import OfflineBanner from "@/Components/Molecules/OfflineBanner";
@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import { validateEmail } from "@/Utils/authValidation";
 
-export default function ForgotPassword({ status }) {
+export default function ForgotPassword({ status: propStatus }) {
+    const { props } = usePage();
+    const activeStatus = propStatus || props?.status || props?.flash?.status;
     const [touched, setTouched] = useState(false);
     const [clientError, setClientError] = useState("");
     const [shake, setShake] = useState(false);
@@ -91,13 +93,13 @@ export default function ForgotPassword({ status }) {
                             </div>
 
                             {/* Success Status Alert */}
-                            {status && (
+                            {activeStatus && (
                                 <div className="mb-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-start gap-3 animate-in fade-in duration-200 shadow-xs">
                                     <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="font-bold text-emerald-950">Recovery Request Sent</p>
+                                        <p className="font-bold text-emerald-950">Recovery Link Sent</p>
                                         <p className="text-[11px] mt-0.5 leading-relaxed text-emerald-800">
-                                            {status}
+                                            {activeStatus}
                                         </p>
                                     </div>
                                 </div>

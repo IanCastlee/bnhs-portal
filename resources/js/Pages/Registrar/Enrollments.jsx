@@ -94,18 +94,32 @@ export default function Enrollments({
 
     const handleSearch = (e) => {
         e.preventDefault();
+        const params = { search: searchTerm, status: selectedStatus };
+        if (filters.academic_year_id) {
+            params.academic_year_id = filters.academic_year_id;
+        }
+        if (filters.grade_level_id) {
+            params.grade_level_id = filters.grade_level_id;
+        }
         router.get(
             "/registrar/enrollments",
-            { search: searchTerm, status: selectedStatus },
+            params,
             { preserveState: true },
         );
     };
 
     const handleStatusFilter = (status) => {
         setSelectedStatus(status);
+        const params = { search: searchTerm, status };
+        if (filters.academic_year_id) {
+            params.academic_year_id = filters.academic_year_id;
+        }
+        if (filters.grade_level_id) {
+            params.grade_level_id = filters.grade_level_id;
+        }
         router.get(
             "/registrar/enrollments",
-            { search: searchTerm, status },
+            params,
             { preserveState: true },
         );
     };

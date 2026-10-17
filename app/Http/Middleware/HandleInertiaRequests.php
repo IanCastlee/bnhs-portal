@@ -37,6 +37,18 @@ class HandleInertiaRequests extends Middleware
                     return $year ? $year->toArray() : null;
                 });
             },
+            'all_academic_years' => function () {
+                return \Illuminate\Support\Facades\Cache::remember('all_academic_years_global', 3600, function () {
+                    return \App\Modules\Academic\Models\AcademicYear::select(['id', 'name', 'semester', 'is_active', 'is_enrollment_open', 'is_grading_open'])
+                        ->orderBy('is_active', 'desc')
+                        ->orderBy('name', 'desc')
+                        ->get()
+                        ->toArray();
+                });
+            },
+            'selected_academic_year_id' => function () {
+                return session('registrar_academic_year_id');
+            },
             'auth' => [
                 'user' => function () use ($request) {
                     if (!$request->user()) return null;
@@ -65,6 +77,13 @@ class HandleInertiaRequests extends Middleware
                 },
                 'notifications' => $request->user() ? $request->user()->unreadNotifications()->take(10)->get() : [],
                 'unread_notifications_count' => $request->user() ? $request->user()->unreadNotifications()->count() : 0,
+            ],
+            'status' => fn () => $request->session()->get('status'),
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'status' => fn () => $request->session()->get('status'),
             ],
         ];
     }

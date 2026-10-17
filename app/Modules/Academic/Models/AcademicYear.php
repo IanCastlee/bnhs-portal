@@ -22,6 +22,19 @@ class AcademicYear extends Model
         'is_grading_open' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('active_academic_year_global');
+            \Illuminate\Support\Facades\Cache::forget('all_academic_years_global');
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('active_academic_year_global');
+            \Illuminate\Support\Facades\Cache::forget('all_academic_years_global');
+        });
+    }
+
     public function sections(): HasMany
     {
         return $this->hasMany(Section::class);

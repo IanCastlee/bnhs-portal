@@ -22,7 +22,9 @@ import {
     X,
     Filter,
     Trash2,
+    BookOpen,
 } from "lucide-react";
+import ManageSectionSubjectsModal from "@/Components/Organisms/Registrar/ManageSectionSubjectsModal";
 
 export default function Sectioning({
     assignedGradeLevels = [],
@@ -51,6 +53,15 @@ export default function Sectioning({
     const [targetSectionForAdviser, setTargetSectionForAdviser] = useState(null);
     const [selectedAdviserId, setSelectedAdviserId] = useState("");
     const [isAssigningAdviser, setIsAssigningAdviser] = useState(false);
+
+    // Subject & Teacher Schedule Modal State
+    const [showSubjectsModal, setShowSubjectsModal] = useState(false);
+    const [targetSectionForSubjects, setTargetSectionForSubjects] = useState(null);
+
+    const openSubjectsModal = (section) => {
+        setTargetSectionForSubjects(section);
+        setShowSubjectsModal(true);
+    };
 
     // Auto-Distribute Form State
     const [selectedSectionIds, setSelectedSectionIds] = useState(
@@ -528,6 +539,18 @@ export default function Sectioning({
                                                 ))
                                             )}
                                         </div>
+
+                                        {/* Card Footer: Subjects & Schedule */}
+                                        <div className="p-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => openSubjectsModal(section)}
+                                                className="w-full py-2 px-3 rounded-xl bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                                            >
+                                                <BookOpen className="w-3.5 h-3.5 text-emerald-700" />
+                                                <span>I-manage ang Subjects & Schedule</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -613,22 +636,22 @@ export default function Sectioning({
             {/* ➕ Modal: Create New Section */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-                    <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                            <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
-                                <Plus className="w-5 h-5 text-emerald-700" />
+                    <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100">
+                        <div className="p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
+                            <h3 className="font-black text-white text-base flex items-center gap-2">
+                                <Plus className="w-5 h-5 text-emerald-300" />
                                 <span>Bagong Section (Grade {selectedGradeLevel?.level})</span>
                             </h3>
                             <button
                                 type="button"
                                 onClick={() => setShowCreateModal(false)}
-                                className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleCreateSection} className="space-y-4 text-xs">
+                        <form onSubmit={handleCreateSection} className="p-6 space-y-4 text-xs">
                             <div>
                                 <label className="block font-bold text-slate-700 mb-1">
                                     Pangalan ng Section
@@ -709,27 +732,27 @@ export default function Sectioning({
             {/* ⚡ Modal: Auto-Distribution Strategy */}
             {showDistributeModal && (
                 <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-                    <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-100">
+                        <div className="p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-start justify-between gap-3 shadow-xs">
                             <div>
-                                <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
-                                    <Sparkles className="w-5 h-5 text-emerald-700" />
+                                <h3 className="font-black text-white text-base flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5 text-emerald-300" />
                                     <span>Auto-Distribute ({unsectionedStudents.length} Mag-aaral)</span>
                                 </h3>
-                                <p className="text-xs text-slate-500 mt-0.5">
+                                <p className="text-xs text-emerald-100/90 mt-0.5">
                                     Pumili ng pamantayan kung paano hahatiin ang mga estudyante sa mga sections.
                                 </p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setShowDistributeModal(false)}
-                                className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleAutoDistribute} className="space-y-4 text-xs">
+                        <form onSubmit={handleAutoDistribute} className="p-6 space-y-4 text-xs">
                             {/* Strategy Options */}
                             <div className="space-y-2">
                                 <label className="block font-bold text-slate-800">
@@ -896,27 +919,29 @@ export default function Sectioning({
             {/* 🔄 Modal: Manual Move / Assign Student */}
             {showMoveModal && movingStudent && (
                 <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-                    <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-xs">
-                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                            <h3 className="font-black text-slate-900 text-base">
-                                Ilipat sa Section
+                    <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-slate-100 text-xs">
+                        <div className="p-4 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
+                            <h3 className="font-black text-white text-base flex items-center gap-2">
+                                <ArrowRightLeft className="w-4 h-4 text-emerald-300" />
+                                <span>Ilipat sa Section</span>
                             </h3>
                             <button
                                 type="button"
                                 onClick={() => setShowMoveModal(false)}
-                                className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div>
-                            <p className="text-slate-500 font-bold uppercase text-[10px]">Estudyante</p>
-                            <p className="font-bold text-slate-900 text-sm">{movingStudent.student?.name}</p>
-                            <p className="text-slate-400 font-mono text-[11px]">LRN: {movingStudent.student?.lrn}</p>
-                        </div>
+                        <div className="p-5 space-y-4">
+                            <div>
+                                <p className="text-slate-500 font-bold uppercase text-[10px]">Estudyante</p>
+                                <p className="font-bold text-slate-900 text-sm">{movingStudent.student?.name}</p>
+                                <p className="text-slate-400 font-mono text-[11px]">LRN: {movingStudent.student?.lrn}</p>
+                            </div>
 
-                        <form onSubmit={handleManualAssign} className="space-y-4">
+                            <form onSubmit={handleManualAssign} className="space-y-4">
                             <div>
                                 <label className="block font-bold text-slate-700 mb-1">
                                     Pumili ng Target Section:
@@ -955,6 +980,7 @@ export default function Sectioning({
                                 </Button>
                             </div>
                         </form>
+                        </div>
                     </div>
                 </div>
             )}
@@ -962,10 +988,10 @@ export default function Sectioning({
             {/* Modal: Assign Class Adviser */}
             {showAdviserModal && targetSectionForAdviser && (
                 <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-                    <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-xs">
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                            <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
-                                <GraduationCap className="w-5 h-5 text-emerald-700" />
+                    <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100 text-xs">
+                        <div className="p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
+                            <h3 className="font-black text-white text-base flex items-center gap-2">
+                                <GraduationCap className="w-5 h-5 text-emerald-300" />
                                 <span>I-assign ang Class Adviser</span>
                             </h3>
                             <button
@@ -974,13 +1000,14 @@ export default function Sectioning({
                                     setShowAdviserModal(false);
                                     setTargetSectionForAdviser(null);
                                 }}
-                                className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                        <div className="p-5 space-y-4">
+                            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
                             <div className="flex items-center justify-between">
                                 <span className="text-[11px] font-bold text-slate-500 uppercase">Section:</span>
                                 <span className="font-black text-slate-900 text-sm">{targetSectionForAdviser.name}</span>
@@ -1079,8 +1106,22 @@ export default function Sectioning({
                                 </Button>
                             </div>
                         </form>
+                        </div>
                     </div>
                 </div>
+            )}
+
+            {/* 📖 Modal: Manage Subjects, Teacher Assignment & Schedule */}
+            {showSubjectsModal && targetSectionForSubjects && (
+                <ManageSectionSubjectsModal
+                    isOpen={showSubjectsModal}
+                    onClose={() => {
+                        setShowSubjectsModal(false);
+                        setTargetSectionForSubjects(null);
+                    }}
+                    section={targetSectionForSubjects}
+                    teachers={teachers}
+                />
             )}
         </PortalLayout>
     );

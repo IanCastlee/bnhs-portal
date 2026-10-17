@@ -31,12 +31,14 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
 
-    //  FORGOT & RESET PASSWORD
+    //  FORGOT PASSWORD REQUEST
     Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPassword'])->name('password.request');
     Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:6,1')->name('password.email');
-    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])->name('password.reset');
-    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:6,1')->name('password.update');
 });
+
+//  RESET PASSWORD (Accessible with valid reset link/token even if a session is present)
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:6,1')->name('password.update');
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 

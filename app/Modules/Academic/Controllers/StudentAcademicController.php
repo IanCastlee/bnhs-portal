@@ -181,6 +181,16 @@ class StudentAcademicController extends Controller
             return redirect()->route('student.admission');
         }
 
+        // Load section subjects with assigned teachers and rooms
+        $enrollment->load([
+            'section.adviser',
+            'section.sectionSubjects.teacher:id,name,email',
+            'section.sectionSubjects.subject',
+            'gradeLevel',
+            'strand',
+            'academicYear',
+        ]);
+
         // Fetch all curriculum subjects for this student's grade & strand
         $subjects = Subject::where('grade_level_id', $enrollment->grade_level_id)
             ->when($enrollment->strand_id, function ($query) use ($enrollment) {
@@ -194,9 +204,29 @@ class StudentAcademicController extends Controller
             ->orderBy('code')
             ->get();
 
+        $sectionAssignments = $enrollment->section?->sectionSubjects?->keyBy('subject_id');
+
+        $scheduleList = $subjects->map(function ($subject) use ($sectionAssignments, $enrollment) {
+            $assignment = $sectionAssignments?->get($subject->id);
+
+            return [
+                'subject_id'    => $subject->id,
+                'code'          => $subject->code,
+                'name'          => $subject->name,
+                'semester'      => $subject->semester,
+                'teacher'       => $assignment?->teacher?->name ?? 'TBA (Itatalaga)',
+                'teacher_email' => $assignment?->teacher?->email,
+                'schedule_days' => $assignment?->schedule_days ?? 'Monday - Friday',
+                'time_start'    => $assignment?->time_start ? substr($assignment->time_start, 0, 5) : null,
+                'time_end'      => $assignment?->time_end ? substr($assignment->time_end, 0, 5) : null,
+                'room'          => $assignment?->room ?? 'TBA',
+            ];
+        });
+
         return Inertia::render('Student/Classes', [
-            'enrollment' => $enrollment,
-            'subjects'   => $subjects,
+            'enrollment'   => $enrollment,
+            'subjects'     => $subjects,
+            'scheduleList' => $scheduleList,
         ]);
     }
 }

@@ -45,4 +45,7 @@ Route::middleware(['auth', 'role:REGISTRAR,ADMIN'])->prefix('registrar')->name('
     Route::post('/sectioning/auto-distribute', [RegistrarSectioningController::class, 'autoDistribute'])->name('sectioning.auto_distribute');
     Route::post('/sectioning/assign-single', [RegistrarSectioningController::class, 'assignSingle'])->name('sectioning.assign_single');
     Route::post('/sectioning/reset', [RegistrarSectioningController::class, 'reset'])->name('sectioning.reset');
+        // 📖 Subject & Teacher Assignment para sa Section
+    Route::get('/sectioning/{section}/subjects', [RegistrarSectioningController::class, 'getSectionSubjects'])->name('sectioning.subjects');
+    Route::post('/sectioning/{section}/assign-subjects', [RegistrarSectioningController::class, 'assignSubjects'])->name('sectioning.assign_subjects');
 });

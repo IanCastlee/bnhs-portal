@@ -14,12 +14,15 @@ use App\Modules\Identity\Models\User;
 use App\Notifications\StudentSectionAssignedNotification;
 use App\Notifications\TeacherAdviserAssignedNotification;
 use App\Notifications\SectionAdviserUpdatedNotification;
+use App\Modules\Academic\Models\SectionSubject;
+use App\Modules\Academic\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 
 /**
  * Registrar Sectioning Controller
@@ -48,6 +51,13 @@ class RegistrarSectioningController extends Controller
     {
         $user = Auth::user();
         $activeYear = AcademicYear::where('is_active', true)->first();
+        if ($request->has('academic_year_id')) {
+            $academicYearId = $request->query('academic_year_id');
+            session(['registrar_academic_year_id' => $academicYearId]);
+        } else {
+            $academicYearId = session('registrar_academic_year_id', $activeYear?->id);
+        }
+        $selectedYear = $academicYearId ? (AcademicYear::find($academicYearId) ?? $activeYear) : $activeYear;
 
         // Get assigned grade levels (or all if admin)
         $assignedGradeLevels = $user->isRegistrar() && $user->assignedGradeLevels()->exists()
@@ -62,14 +72,14 @@ class RegistrarSectioningController extends Controller
         $selectedGradeLevel = $assignedGradeLevels->firstWhere('id', (int) $selectedGradeLevelId)
             ?? $assignedGradeLevels->first();
 
-        // Fetch sections for the selected grade level and active academic year
+        // Fetch sections for the selected grade level and selected academic year
         $sections = [];
         $unsectionedStudents = [];
 
-        if ($selectedGradeLevel && $activeYear) {
+        if ($selectedGradeLevel && $selectedYear) {
             $sections = Section::with(['adviser:id,name,email'])
                 ->where('grade_level_id', $selectedGradeLevel->id)
-                ->where('academic_year_id', $activeYear->id)
+                ->where('academic_year_id', $selectedYear->id)
                 ->withCount(['enrollments as enrolled_count' => function ($q) {
                     $q->where('status', EnrollmentStatus::APPROVED);
                 }])
@@ -84,7 +94,7 @@ class RegistrarSectioningController extends Controller
 
             // Fetch approved students without a section
             $unsectionedStudents = Enrollment::with('student:id,name,email,lrn,avatar_path')
-                ->where('academic_year_id', $activeYear->id)
+                ->where('academic_year_id', $selectedYear->id)
                 ->where('grade_level_id', $selectedGradeLevel->id)
                 ->where('status', EnrollmentStatus::APPROVED)
                 ->whereNull('section_id')
@@ -92,12 +102,12 @@ class RegistrarSectioningController extends Controller
                 ->get();
         }
 
-        // Fetch all active faculty teachers with their current advisory section for the active school year
+        // Fetch all active faculty teachers with their current advisory section for the selected school year
         $teachers = User::where('role', UserRole::TEACHER)
             ->where('is_active', true)
-            ->with(['advisedSections' => function ($q) use ($activeYear) {
-                if ($activeYear) {
-                    $q->where('academic_year_id', $activeYear->id);
+            ->with(['advisedSections' => function ($q) use ($selectedYear) {
+                if ($selectedYear) {
+                    $q->where('academic_year_id', $selectedYear->id);
                 }
                 $q->select('id', 'name', 'grade_level_id', 'adviser_id', 'academic_year_id')
                   ->with('gradeLevel:id,level,name');
@@ -121,7 +131,8 @@ class RegistrarSectioningController extends Controller
             'assignedGradeLevels' => $assignedGradeLevels,
             'selectedGradeLevelId' => (int) ($selectedGradeLevel?->id ?? 0),
             'selectedGradeLevel' => $selectedGradeLevel,
-            'activeSchoolYear' => $activeYear,
+            'activeSchoolYear' => $selectedYear ?? $activeYear,
+            'officialActiveSchoolYear' => $activeYear,
             'sections' => $sections,
             'unsectionedStudents' => $unsectionedStudents,
             'teachers' => $teachers,
@@ -575,5 +586,119 @@ class RegistrarSectioningController extends Controller
         });
 
         return back()->with('success', "Matagumpay na tinanggal ang Section {$sectionName}.");
+    }
+
+    /**
+     * 📖 Kuhanin ang listahan ng mga Subjects para sa Grade Level ng Section,
+     * kasama ang mga kasalukuyang nakatalagang guro at schedule.
+     */
+    public function getSectionSubjects(Section $section): JsonResponse
+    {
+        $this->authorizeGradeLevel((int) $section->grade_level_id);
+
+        // 1. Kuhanin ang curriculum subjects para sa Grade Level (at Strand kung Senior High)
+        if ($section->strand_id) {
+            $subjects = Subject::where('grade_level_id', $section->grade_level_id)
+                ->where(function ($q) use ($section) {
+                    $q->where('strand_id', $section->strand_id)
+                      ->orWhereNull('strand_id');
+                })
+                ->orderBy('code')
+                ->get();
+        } else {
+            $subjects = Subject::where('grade_level_id', $section->grade_level_id)
+                ->orderBy('code')
+                ->get();
+        }
+
+        // 2. Kuhanin ang mga kasalukuyang naka-assign sa section_subjects table
+        $existingAssignments = SectionSubject::with('teacher:id,name,email')
+            ->where('section_id', $section->id)
+            ->where('academic_year_id', $section->academic_year_id)
+            ->get()
+            ->keyBy('subject_id');
+
+        // 3. I-map ang bawat subject kasama ang kanyang teacher at oras
+        $payload = $subjects->map(function ($subject) use ($existingAssignments) {
+            $assignment = $existingAssignments->get($subject->id);
+
+            return [
+                'subject_id' => $subject->id,
+                'code' => $subject->code,
+                'name' => $subject->name,
+                'semester' => $subject->semester,
+                'teacher_id' => $assignment?->teacher_id,
+                'teacher' => $assignment?->teacher ? [
+                    'id' => $assignment->teacher->id,
+                    'name' => $assignment->teacher->name,
+                    'email' => $assignment->teacher->email,
+                ] : null,
+                'schedule_days' => $assignment?->schedule_days ?? 'Monday - Friday',
+                'time_start' => $assignment?->time_start ? substr($assignment->time_start, 0, 5) : '',
+                'time_end' => $assignment?->time_end ? substr($assignment->time_end, 0, 5) : '',
+                'room' => $assignment?->room ?? '',
+            ];
+        });
+
+        return response()->json([
+            'section' => [
+                'id' => $section->id,
+                'name' => $section->name,
+                'grade_level_id' => $section->grade_level_id,
+                'academic_year_id' => $section->academic_year_id,
+            ],
+            'subjects' => $payload,
+        ]);
+    }
+
+    /**
+     * 💾 I-save o i-update ang itinalagang Guro at Schedule para sa bawat Subject ng Section.
+     */
+    public function assignSubjects(Request $request, Section $section): RedirectResponse|JsonResponse
+    {
+        $this->authorizeGradeLevel((int) $section->grade_level_id);
+
+        $validated = $request->validate([
+            'assignments' => ['required', 'array'],
+            'assignments.*.subject_id' => ['required', 'exists:subjects,id'],
+            'assignments.*.teacher_id' => ['nullable', 'exists:users,id'],
+            'assignments.*.schedule_days' => ['nullable', 'string', 'max:50'],
+            'assignments.*.time_start' => ['nullable', 'string', 'max:10'],
+            'assignments.*.time_end' => ['nullable', 'string', 'max:10'],
+            'assignments.*.room' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        DB::transaction(function () use ($validated, $section) {
+            foreach ($validated['assignments'] as $item) {
+                SectionSubject::updateOrCreate(
+                    [
+                        'academic_year_id' => $section->academic_year_id,
+                        'section_id' => $section->id,
+                        'subject_id' => $item['subject_id'],
+                    ],
+                    [
+                        'teacher_id' => $item['teacher_id'] ?: null,
+                        'schedule_days' => $item['schedule_days'] ?? 'Monday - Friday',
+                        'time_start' => !empty($item['time_start']) ? $item['time_start'] : null,
+                        'time_end' => !empty($item['time_end']) ? $item['time_end'] : null,
+                        'room' => $item['room'] ?? null,
+                    ]
+                );
+            }
+
+            AuditLog::record(
+                'SECTION_SUBJECTS_UPDATED',
+                "Updated subject teacher assignments and class schedule for Section {$section->name}.",
+                $section,
+                ['section_id' => $section->id, 'assignments_count' => count($validated['assignments'])],
+                'ACADEMIC'
+            );
+        });
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Subject teacher assignments saved successfully!']);
+        }
+
+        return back()->with('success', "Subjects and teacher schedule for Section {$section->name} have been updated successfully!");
     }
 }

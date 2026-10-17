@@ -527,20 +527,25 @@ export default function QueueJobsIndex({
             {selectedJob && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-                            <div>
-                                <h3 className="font-bold text-slate-900 text-sm">
-                                    Failed Job Diagnostic Inspection: #{selectedJob.id}
-                                </h3>
-                                <p className="text-xs text-slate-500 mt-0.5">
-                                    {selectedJob.display_name} • Failed at {selectedJob.failed_at}
-                                </p>
+                        <div className="shrink-0 p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-white/10 text-emerald-300 flex items-center justify-center font-bold">
+                                    <ShieldAlert className="w-5 h-5 text-amber-300" />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-white text-base leading-tight">
+                                        Failed Job Diagnostic Inspection: #{selectedJob.id}
+                                    </h3>
+                                    <p className="text-xs text-emerald-100/80 mt-0.5">
+                                        {selectedJob.display_name} • Failed at {selectedJob.failed_at}
+                                    </p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setSelectedJob(null)}
-                                className="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 

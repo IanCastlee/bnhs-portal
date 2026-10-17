@@ -31,8 +31,8 @@ createInertiaApp({
         );
     },
     progress: {
-        color: "#10b981", // BNHS Emerald green
+        color: "#10b981",
         showSpinner: false,
-        delay: 10, // Only show if request takes longer than 250ms
+        delay: 250, // Lalabas lamang ang loading bar kung lumampas sa 250ms ang request
     },
 });

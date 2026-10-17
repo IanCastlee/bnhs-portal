@@ -87,31 +87,39 @@ export default function EditAnnouncementModal({ post, isOpen, onClose }) {
 
     return (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col overflow-hidden">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                        <Edit3 className="w-5 h-5 text-indigo-600" />
-                        Edit Announcement
-                    </h3>
+                <div className="shrink-0 p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-emerald-300">
+                            <Edit3 className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-base font-bold text-white leading-tight">
+                                Edit School Announcement
+                            </h3>
+                            <p className="text-xs text-emerald-100/80 mt-0.5">Update broadcast details, priority, or content</p>
+                        </div>
+                    </div>
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                        className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                {/* Offline Alert */}
-                {!isOnline && (
-                    <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2 text-xs font-bold">
-                        <WifiOff className="w-4 h-4 text-rose-500 shrink-0" />
-                        <span>Offline ka ngayon. Ikonekta muna ang iyong internet bago mag-save.</span>
-                    </div>
-                )}
+                <div className="p-6 overflow-y-auto">
+                    {/* Offline Alert */}
+                    {!isOnline && (
+                        <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2 text-xs font-bold">
+                            <WifiOff className="w-4 h-4 text-rose-500 shrink-0" />
+                            <span>Offline ka ngayon. Ikonekta muna ang iyong internet bago mag-save.</span>
+                        </div>
+                    )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4">
                     <FormField
                         label="Announcement Title"
                         id="edit-title"
@@ -235,6 +243,7 @@ export default function EditAnnouncementModal({ post, isOpen, onClose }) {
                         )}
                     </div>
                 </form>
+                </div>
             </div>
         </div>
     );

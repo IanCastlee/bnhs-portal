@@ -489,26 +489,26 @@ export default function TeachersIndex({
             {/* Modal: Register New Teacher */}
             {createModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-                    <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100">
-                        <div className="px-6 py-5 bg-[#16223b] text-white flex items-center justify-between">
+                    <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+                        <div className="shrink-0 p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center ring-1 ring-emerald-500/30">
+                                <div className="w-9 h-9 rounded-xl bg-white/10 text-emerald-300 flex items-center justify-center font-bold">
                                     <UserPlus className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="font-black text-sm">Register Faculty Teacher</h3>
-                                    <p className="text-[11px] text-slate-300">Create a new institutional faculty account</p>
+                                    <h3 className="font-black text-white text-base leading-tight">Register Faculty Teacher</h3>
+                                    <p className="text-xs text-emerald-100/80 mt-0.5">Create a new institutional faculty account</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setCreateModalOpen(false)}
-                                className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleCreateSubmit} className="p-6 space-y-4">
+                        <form onSubmit={handleCreateSubmit} className="p-6 overflow-y-auto space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                                     Full Name <span className="text-rose-500">*</span>
@@ -638,26 +638,26 @@ export default function TeachersIndex({
             {/* Modal: Edit Teacher Profile */}
             {editModalOpen && selectedTeacher && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-                    <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100">
-                        <div className="px-6 py-5 bg-[#16223b] text-white flex items-center justify-between">
+                    <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+                        <div className="shrink-0 p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center ring-1 ring-blue-500/30">
+                                <div className="w-9 h-9 rounded-xl bg-white/10 text-emerald-300 flex items-center justify-center font-bold">
                                     <Edit3 className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="font-black text-sm">Edit Faculty Profile</h3>
-                                    <p className="text-[11px] text-slate-300">Update account credentials and details</p>
+                                    <h3 className="font-black text-white text-base leading-tight">Edit Faculty Profile</h3>
+                                    <p className="text-xs text-emerald-100/80 mt-0.5">Update account credentials and details</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setEditModalOpen(false)}
-                                className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+                        <form onSubmit={handleEditSubmit} className="p-6 overflow-y-auto space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                                     Full Name <span className="text-rose-500">*</span>
@@ -748,26 +748,26 @@ export default function TeachersIndex({
             {/* Modal: Reset Password */}
             {resetPwModalOpen && selectedTeacher && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-                    <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-100">
-                        <div className="px-6 py-5 bg-[#16223b] text-white flex items-center justify-between">
+                    <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+                        <div className="shrink-0 p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center ring-1 ring-amber-500/30">
+                                <div className="w-9 h-9 rounded-xl bg-white/10 text-emerald-300 flex items-center justify-center font-bold">
                                     <KeyRound className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="font-black text-sm">Reset Password</h3>
-                                    <p className="text-[11px] text-slate-300">Set new credentials for {selectedTeacher.name}</p>
+                                    <h3 className="font-black text-white text-base leading-tight">Reset Password</h3>
+                                    <p className="text-xs text-emerald-100/80 mt-0.5">Set new credentials for {selectedTeacher.name}</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setResetPwModalOpen(false)}
-                                className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleResetPwSubmit} className="p-6 space-y-4">
+                        <form onSubmit={handleResetPwSubmit} className="p-6 overflow-y-auto space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                                     New Password <span className="text-rose-500">*</span>

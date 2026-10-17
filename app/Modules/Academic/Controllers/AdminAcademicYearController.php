@@ -103,50 +103,16 @@ class AdminAcademicYearController extends Controller
             Cache::forget('active_school_year');
             Cache::forget('active_academic_year_global');
 
-            //  Invalidate all sessions except the currently active Admin
-            // 1. If database sessions are present
-            if (\Illuminate\Support\Facades\Schema::hasTable('sessions')) {
-                DB::table('sessions')
-                    ->when($currentUserId, fn($q) => $q->where('user_id', '!=', $currentUserId))
-                    ->delete();
-            }
-
-            // 2. If Redis session driver is active
-            try {
-                $redis = app('redis')->connection(config('session.connection', 'default'));
-                $keys = $redis->keys('*cache-*');
-                $authKeyPattern = 'login_web_';
-
-                foreach ($keys as $fullKey) {
-                    $cleanKey = preg_replace('/^.*?bnhs-portal-cache-/', '', $fullKey);
-                    $raw = $redis->get($cleanKey);
-                    if ($raw) {
-                        // Check if session contains an authenticated user other than the current Admin
-                        $pos = strpos($raw, $authKeyPattern);
-                        if ($pos !== false) {
-                            if (preg_match('/login_web_[a-f0-9]+":([0-9]+)/', $raw, $matches)) {
-                                $sessionUserId = (int) $matches[1];
-                                if ($sessionUserId !== $currentUserId) {
-                                    $redis->del($cleanKey);
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning("Failed purging Redis sessions on SY activation: " . $e->getMessage());
-            }
-
-            //  Log Audit Trail
+            // Log Audit Trail
             \App\Modules\Identity\Models\AuditLog::record(
                 action: 'ACADEMIC_YEAR_ACTIVATED',
-                description: "Academic Year {$academicYear->name} was set to ACTIVE. All non-admin user sessions and global caches were reset.",
+                description: "Academic Year {$academicYear->name} was set to ACTIVE. Global caches were refreshed.",
                 target: $academicYear,
                 module: 'ACADEMIC'
             );
         });
 
-        return redirect()->back()->with('success', "S.Y. {$academicYear->name} is now the active School Year. All users have been logged out to load the new academic records.");
+        return redirect()->back()->with('success', "S.Y. {$academicYear->name} is now the active School Year.");
     }
 
     /**

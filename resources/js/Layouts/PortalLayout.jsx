@@ -26,6 +26,7 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
     const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile drawer
     const [isCollapsed, setIsCollapsed] = useState(false); // Desktop collapse/expand
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+    const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
     const [openMenus, setOpenMenus] = useState(() => {
         const initial = {};
         if (
@@ -53,20 +54,60 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
         }));
     };
 
-    // Safe Dynamic Active School Year Label
-    const getActiveYearLabel = () => {
-        const raw =
-            props?.active_academic_year ||
-            props?.activeYear ||
-            props?.academic_year ||
-            props?.activeSchoolYear;
-        if (!raw) return "S.Y. Active";
-        if (typeof raw === "string") return `S.Y. ${raw} Active`;
-        if (typeof raw === "object") {
-            const name = raw.name || raw.year || raw.title;
-            return name ? `S.Y. ${name} Active` : "S.Y. Active";
+    // Safe Dynamic Academic Year & Workspace Selection
+    const allAcademicYears = props?.all_academic_years || [];
+    const activeAcademicYear = props?.active_academic_year;
+
+    // Detect currently viewed Academic Year from URL search params, filters, props, or localStorage
+    const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
+    const storedYearId = typeof window !== "undefined" ? localStorage.getItem("bnhs_registrar_academic_year_id") : null;
+    const urlYearId = searchParams.get("academic_year_id") || props?.filters?.academic_year_id || props?.selected_academic_year_id || storedYearId;
+
+    const currentViewYear = urlYearId
+        ? allAcademicYears.find((y) => String(y.id) === String(urlYearId)) || activeAcademicYear
+        : activeAcademicYear;
+
+    const isCurrentActive =
+        (currentViewYear && activeAcademicYear && String(currentViewYear.id) === String(activeAcademicYear.id)) ||
+        Boolean(currentViewYear?.is_active);
+
+    const handleSelectYear = (year) => {
+        setYearDropdownOpen(false);
+        if (typeof window !== "undefined") {
+            if (year.is_active) {
+                localStorage.removeItem("bnhs_registrar_academic_year_id");
+            } else {
+                localStorage.setItem("bnhs_registrar_academic_year_id", String(year.id));
+            }
         }
-        return "S.Y. Active";
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set("academic_year_id", year.id);
+
+        if (currentUrl.searchParams.has("page")) {
+            currentUrl.searchParams.delete("page");
+        }
+        if (currentUrl.searchParams.has("cursor")) {
+            currentUrl.searchParams.delete("cursor");
+        }
+
+        router.get(
+            currentUrl.pathname + currentUrl.search,
+            {},
+            {
+                preserveState: false,
+                preserveScroll: true,
+            }
+        );
+    };
+
+    // Helper to preserve active/archived school year across workspace navigation
+    const buildNavHref = (rawHref) => {
+        if (!urlYearId || isCurrentActive || typeof rawHref !== "string" || !rawHref.startsWith("/registrar/")) {
+            return rawHref;
+        }
+        return rawHref.includes("?")
+            ? `${rawHref}&academic_year_id=${urlYearId}`
+            : `${rawHref}?academic_year_id=${urlYearId}`;
     };
 
     // Load and Persist Sidebar Collapsed State
@@ -483,9 +524,9 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
                                                                         key={
                                                                             child.name
                                                                         }
-                                                                        href={
+                                                                        href={buildNavHref(
                                                                             child.href
-                                                                        }
+                                                                        )}
                                                                         className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all group ${
                                                                             isThisChildActive
                                                                                 ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30 font-bold"
@@ -518,7 +559,7 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
                                     return (
                                         <Link
                                             key={item.name}
-                                            href={item.href}
+                                            href={buildNavHref(item.href)}
                                             title={
                                                 isCollapsed
                                                     ? item.name
@@ -623,9 +664,105 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 shadow-2xs">
-                            <Shield className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>{getActiveYearLabel()}</span>
+                        {/* Interactive Academic Year Directory Dropdown */}
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setYearDropdownOpen((prev) => !prev)}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold shadow-2xs border transition-all cursor-pointer ${
+                                    isCurrentActive
+                                        ? "bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800"
+                                        : "bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-900"
+                                }`}
+                                title="Click to filter or switch School Year view"
+                            >
+                                <Shield className={`w-3.5 h-3.5 shrink-0 ${isCurrentActive ? "text-emerald-600" : "text-amber-600"}`} />
+                                <span className="max-w-[170px] truncate sm:max-w-none">
+                                    {isCurrentActive
+                                        ? `S.Y. ${currentViewYear?.name || "Active"} Active`
+                                        : `Archived S.Y. ${currentViewYear?.name || ""}`}
+                                </span>
+                                <ChevronDown
+                                    className={`w-3 h-3 shrink-0 transition-transform duration-200 ${
+                                        yearDropdownOpen ? "rotate-180" : ""
+                                    }`}
+                                />
+                            </button>
+
+                            {/* Dropdown Popover */}
+                            {yearDropdownOpen && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-40"
+                                        onClick={() => setYearDropdownOpen(false)}
+                                    />
+                                    <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                                        <div className="px-3.5 py-2.5 border-b border-slate-100 bg-slate-50/80">
+                                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                                School Year Directory
+                                            </p>
+                                            <p className="text-[11px] text-slate-500 mt-0.5">
+                                                Filter workspace records by Academic Cycle
+                                            </p>
+                                        </div>
+
+                                        <div className="max-h-64 overflow-y-auto divide-y divide-slate-100">
+                                            {allAcademicYears && allAcademicYears.length > 0 ? (
+                                                allAcademicYears.map((year) => {
+                                                    const isSelected = String(year.id) === String(currentViewYear?.id);
+                                                    return (
+                                                        <button
+                                                            key={year.id}
+                                                            type="button"
+                                                            onClick={() => handleSelectYear(year)}
+                                                            className={`w-full px-3.5 py-2.5 text-left flex items-center justify-between text-xs transition-colors cursor-pointer ${
+                                                                isSelected
+                                                                    ? "bg-emerald-50/80 text-emerald-950 font-bold"
+                                                                    : "hover:bg-slate-50 text-slate-700"
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <span
+                                                                    className={`w-2 h-2 rounded-full shrink-0 ${
+                                                                        year.is_active
+                                                                            ? "bg-emerald-500"
+                                                                            : "bg-slate-300"
+                                                                    }`}
+                                                                />
+                                                                <div>
+                                                                    <span className="font-semibold">{`S.Y. ${year.name}`}</span>
+                                                                    {year.semester && (
+                                                                        <span className="text-[10px] text-slate-400 ml-1.5 font-normal">
+                                                                            ({year.semester})
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-1.5 shrink-0">
+                                                                {year.is_active && (
+                                                                    <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-sm bg-emerald-100 text-emerald-800">
+                                                                        ACTIVE
+                                                                    </span>
+                                                                )}
+                                                                {isSelected && (
+                                                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100/60 px-1.5 py-0.5 rounded">
+                                                                        Viewing
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })
+                                            ) : (
+                                                <div className="px-4 py-3 text-xs text-slate-400 text-center">
+                                                    No school years found
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </header>

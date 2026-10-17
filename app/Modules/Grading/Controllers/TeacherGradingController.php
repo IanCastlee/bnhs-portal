@@ -53,7 +53,33 @@ class TeacherGradingController extends Controller
         // 3. Fetch subjects available for teacher's grade levels
         $subjects = Subject::with('gradeLevel:id,level,name')->orderBy('code')->get();
 
-        // 4. Summary metrics
+        // 4. Fetch actual subject teaching loads assigned to this teacher for active academic year
+        $teachingLoads = $teacher->teachingLoads()
+            ->with([
+                'section.gradeLevel:id,level,name',
+                'subject:id,code,name,semester',
+            ])
+            ->when($activeYear, function ($q) use ($activeYear) {
+                $q->where('academic_year_id', $activeYear->id);
+            })
+            ->get()
+            ->map(function ($load) {
+                return [
+                    'id'            => $load->id,
+                    'section_id'    => $load->section_id,
+                    'section_name'  => $load->section?->name,
+                    'grade_level'   => $load->section?->gradeLevel?->name,
+                    'subject_id'    => $load->subject_id,
+                    'subject_code'  => $load->subject?->code,
+                    'subject_name'  => $load->subject?->name,
+                    'schedule_days' => $load->schedule_days,
+                    'time_start'    => $load->time_start ? substr($load->time_start, 0, 5) : null,
+                    'time_end'      => $load->time_end ? substr($load->time_end, 0, 5) : null,
+                    'room'          => $load->room,
+                ];
+            });
+
+        // 5. Summary metrics
         $totalStudents = Enrollment::whereIn('section_id', $advisorySections->pluck('id'))
             ->where('status', EnrollmentStatus::APPROVED)
             ->count();
@@ -64,11 +90,13 @@ class TeacherGradingController extends Controller
 
         return Inertia::render('Teacher/Dashboard', [
             'advisorySections' => $advisorySections,
+            'teachingLoads'    => $teachingLoads,
             'allSections'      => $allSections,
             'subjects'         => $subjects,
             'activeYear'       => $activeYear,
             'stats'            => [
                 'totalAdvisorySections' => $advisorySections->count(),
+                'totalTeachingLoads'    => $teachingLoads->count(),
                 'totalStudents'         => $totalStudents,
                 'pendingGradingCount'   => $pendingGradingCount,
             ],

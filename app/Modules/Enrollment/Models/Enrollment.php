@@ -56,31 +56,31 @@ class Enrollment extends Model
 
     public function student(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsTo(User::class, 'student_id', 'id');
     }
 
     public function academicYear(): BelongsTo
     {
-        return $this->belongsTo(AcademicYear::class);
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id', 'id');
     }
 
     public function gradeLevel(): BelongsTo
     {
-        return $this->belongsTo(GradeLevel::class);
+        return $this->belongsTo(GradeLevel::class, 'grade_level_id', 'id');
     }
 
     public function strand(): BelongsTo
     {
-        return $this->belongsTo(Strand::class);
+        return $this->belongsTo(Strand::class, 'strand_id', 'id');
     }
 
     public function section(): BelongsTo
     {
-        return $this->belongsTo(Section::class);
+        return $this->belongsTo(Section::class, 'section_id', 'id');
     }
 
     public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'reviewed_by');
+        return $this->belongsTo(User::class, 'reviewed_by', 'id');
     }
 }

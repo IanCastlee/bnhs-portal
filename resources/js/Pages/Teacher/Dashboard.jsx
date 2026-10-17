@@ -20,6 +20,7 @@ import {
 
 export default function TeacherDashboard({
     advisorySections = [],
+    teachingLoads = [],
     allSections = [],
     subjects = [],
     activeYear = null,
@@ -72,9 +73,23 @@ export default function TeacherDashboard({
                 </div>
 
                 {/* 📊 Stat Counters */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black">
+                            <BookOpen className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                                Teaching Loads
+                            </span>
+                            <span className="text-2xl font-black text-slate-900">
+                                {stats.totalTeachingLoads || teachingLoads.length}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-black">
                             <Users className="w-6 h-6" />
                         </div>
                         <div>
@@ -88,12 +103,12 @@ export default function TeacherDashboard({
                     </div>
 
                     <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-black">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black">
                             <GraduationCap className="w-6 h-6" />
                         </div>
                         <div>
                             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                                Total Enrolled Students
+                                Enrolled Students
                             </span>
                             <span className="text-2xl font-black text-slate-900">
                                 {stats.totalStudents || 0}
@@ -114,6 +129,81 @@ export default function TeacherDashboard({
                             </span>
                         </div>
                     </div>
+                </div>
+
+                {/* 📚 My Assigned Teaching Loads & Class Schedule */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                        <div>
+                            <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                                <BookOpen className="w-5 h-5 text-emerald-700" />
+                                <span>My Assigned Teaching Loads ({teachingLoads.length})</span>
+                            </h3>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                                Official subjects and class schedules assigned to you by the Registrar for S.Y. {activeYear?.name || "2026-2027"}.
+                            </p>
+                        </div>
+                    </div>
+
+                    {teachingLoads.length === 0 ? (
+                        <div className="py-8 text-center bg-slate-50/60 rounded-xl border border-dashed border-slate-200 text-xs text-slate-500">
+                            Wala pang naka-assign na subject classes sa kasalukuyang school year. Makipag-ugnayan sa Registrar para sa teaching load assignment.
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                            {teachingLoads.map((load) => (
+                                <div
+                                    key={load.id}
+                                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-emerald-300 transition-all flex flex-col justify-between space-y-3"
+                                >
+                                    <div>
+                                        <div className="flex items-center justify-between gap-1 mb-1.5">
+                                            <span className="font-mono text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                                {load.subject_code}
+                                            </span>
+                                            <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                                                {load.grade_level} - {load.section_name}
+                                            </span>
+                                        </div>
+                                        <h4 className="font-black text-slate-900 text-sm leading-tight">
+                                            {load.subject_name}
+                                        </h4>
+                                        <div className="text-[11px] text-slate-500 mt-2 space-y-1">
+                                            <div className="flex items-center gap-1.5">
+                                                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                                                <span>{load.schedule_days || "Monday - Friday"}</span>
+                                                {load.time_start && load.time_end && (
+                                                    <span className="font-mono text-slate-700 font-semibold">
+                                                        ({load.time_start} - {load.time_end})
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {load.room && (
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-slate-400">Room:</span>
+                                                    <span className="font-semibold text-slate-700">{load.room}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <Link
+                                        href={`/teacher/sections/${load.section_id}/subjects/${load.subject_id}/grades`}
+                                        className="w-full"
+                                    >
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="w-full justify-center font-bold text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 text-xs"
+                                        >
+                                            <FileSpreadsheet className="w-3.5 h-3.5 mr-1.5" />
+                                            <span>Encode Grades</span>
+                                        </Button>
+                                    </Link>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* 🎯 Main Two Action Cards */}

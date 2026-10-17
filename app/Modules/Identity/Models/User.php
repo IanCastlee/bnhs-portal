@@ -76,4 +76,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(\App\Modules\Academic\Models\GradeLevel::class, 'registrar_grade_levels', 'user_id', 'grade_level_id')
             ->withTimestamps();
     }
+
+    public function teachingLoads(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Academic\Models\SectionSubject::class, 'teacher_id', 'id');
+    }
 }

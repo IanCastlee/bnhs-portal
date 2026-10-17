@@ -8,6 +8,10 @@ use App\Modules\Enrollment\Enums\EnrollmentStatus;
 use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\Section;
+
+use App\Modules\Academic\Models\SectionSubject;
+use App\Modules\Academic\Models\Subject;
+
 use App\Jobs\ProcessEnrollmentApprovalJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,9 +47,14 @@ class RegistrarEnrollmentController extends Controller
             'reviewer:id,name,role',
         ]);
 
-        // Active Academic Year Scoping
+        // Active Academic Year Scoping with Session Persistence
         $activeYear = AcademicYear::where('is_active', true)->first();
-        $academicYearId = $request->query('academic_year_id', $activeYear?->id);
+        if ($request->has('academic_year_id')) {
+            $academicYearId = $request->query('academic_year_id');
+            session(['registrar_academic_year_id' => $academicYearId]);
+        } else {
+            $academicYearId = session('registrar_academic_year_id', $activeYear?->id);
+        }
 
         if ($academicYearId) {
             $query->where('academic_year_id', $academicYearId);
@@ -170,6 +179,7 @@ class RegistrarEnrollmentController extends Controller
                 'status' => $status,
                 'search' => $search,
                 'grade_level_id' => $gradeLevelId,
+                'academic_year_id' => $academicYearId ? (int) $academicYearId : null,
                 'cursor' => $useCursor,
             ],
             'counts' => $counts,
