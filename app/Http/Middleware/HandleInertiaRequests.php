@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Illuminate\Support\Facades\Cache;
+
 
 class HandleInertiaRequests extends Middleware
 {
@@ -23,6 +25,55 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
+     * In-request memoized unread notifications summary to avoid duplicate queries.
+     */
+    private ?array $notificationsMemo = null;
+
+    /**
+     * Retrieve the active academic year from global cache (or DB once).
+     */
+    private function activeYear(): ?array
+    {
+        return \App\Modules\Academic\Models\AcademicYear::getCachedActiveArray();
+    }
+
+    /**
+     * Retrieve unread notifications list and count in a single cached/memoized call.
+     */
+    private function unreadNotificationsSummary(Request $request): array
+    {
+        if ($this->notificationsMemo !== null) {
+            return $this->notificationsMemo;
+        }
+
+        $user = $request->user();
+        if (!$user) {
+            return $this->notificationsMemo = ['items' => [], 'count' => 0];
+        }
+
+        return $this->notificationsMemo = Cache::remember(
+            "user_unread_notifications_{$user->id}",
+            30,
+            function () use ($user) {
+                $items = $user->unreadNotifications()
+                    ->latest()
+                    ->take(10)
+                    ->get(['id', 'type', 'data', 'read_at', 'created_at'])
+                    ->toArray();
+
+                $count = count($items) < 10
+                    ? count($items)
+                    : $user->unreadNotifications()->count();
+
+                return [
+                    'items' => $items,
+                    'count' => (int) $count,
+                ];
+            }
+        );
+    }
+
+    /**
      * Define the props that are shared by default.
      *
      * @return array<string, mixed>
@@ -31,14 +82,14 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+            'school_settings' => function () {
+                return \App\Modules\Academic\Models\SchoolSetting::getCached();
+            },
             'active_academic_year' => function () {
-                return \Illuminate\Support\Facades\Cache::remember('active_academic_year_global', 3600, function () {
-                    $year = \App\Modules\Academic\Models\AcademicYear::where('is_active', true)->first(['id', 'name', 'semester', 'is_enrollment_open', 'is_grading_open']);
-                    return $year ? $year->toArray() : null;
-                });
+                return $this->activeYear();
             },
             'all_academic_years' => function () {
-                return \Illuminate\Support\Facades\Cache::remember('all_academic_years_global', 3600, function () {
+                return Cache::remember('all_academic_years_global', 3600, function () {
                     return \App\Modules\Academic\Models\AcademicYear::select(['id', 'name', 'semester', 'is_active', 'is_enrollment_open', 'is_grading_open'])
                         ->orderBy('is_active', 'desc')
                         ->orderBy('name', 'desc')
@@ -51,39 +102,49 @@ class HandleInertiaRequests extends Middleware
             },
             'auth' => [
                 'user' => function () use ($request) {
-                    if (!$request->user()) return null;
+                    $user = $request->user();
+                    if (!$user) {
+                        return null;
+                    }
 
-                    $activeYearId = \App\Modules\Academic\Models\AcademicYear::where('is_active', true)->value('id');
+                    $activeYearId = $this->activeYear()['id'] ?? null;
 
                     $enrollmentStatus = null;
-                    if ($request->user()->role === \App\Modules\Identity\Enums\UserRole::STUDENT) {
-                        $activeEnrollment = \App\Modules\Enrollment\Models\Enrollment::where('student_id', $request->user()->id)
-                            ->when($activeYearId, fn($q) => $q->where('academic_year_id', $activeYearId))
-                            ->first();
+                    if ($user->role === \App\Modules\Identity\Enums\UserRole::STUDENT) {
+                        $enrollmentStatus = Cache::remember(
+                            "student_enrollment_status_{$user->id}",
+                            300,
+                            function () use ($user, $activeYearId) {
+                                $activeEnrollment = \App\Modules\Enrollment\Models\Enrollment::where('student_id', $user->id)
+                                    ->when($activeYearId, fn ($q) => $q->where('academic_year_id', $activeYearId))
+                                    ->first(['id', 'status', 'academic_year_id']);
 
-                        $enrollmentStatus = $activeEnrollment?->status?->value ?? 'NOT_ENROLLED';
+                                return (string) ($activeEnrollment?->status?->value ?? 'NOT_ENROLLED');
+                            }
+                        );
                     }
 
                     return [
-                        'id' => $request->user()->id,
-                        'name' => $request->user()->name,
-                        'email' => $request->user()->email,
-                        'role' => $request->user()->role->value ?? (string) $request->user()->role,
-                        'lrn' => $request->user()->lrn,
-                        'employee_id' => $request->user()->employee_id,
-                        'avatar_path' => $request->user()->avatar_path,
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'role' => $user->role->value ?? (string) $user->role,
+                        'lrn' => $user->lrn,
+                        'employee_id' => $user->employee_id,
+                        'avatar_path' => $user->avatar_path,
                         'enrollment_status' => $enrollmentStatus,
                     ];
                 },
-                'notifications' => $request->user() ? $request->user()->unreadNotifications()->take(10)->get() : [],
-                'unread_notifications_count' => $request->user() ? $request->user()->unreadNotifications()->count() : 0,
+                'notifications' => fn () => $this->unreadNotificationsSummary($request)['items'],
+                'unread_notifications_count' => fn () => $this->unreadNotificationsSummary($request)['count'],
             ],
             'status' => fn () => $request->session()->get('status'),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
+                'error'   => fn () => $request->session()->get('error'),
                 'warning' => fn () => $request->session()->get('warning'),
-                'status' => fn () => $request->session()->get('status'),
+                'info'    => fn () => $request->session()->get('info'),
+                'status'  => fn () => $request->session()->get('status'),
             ],
         ];
     }

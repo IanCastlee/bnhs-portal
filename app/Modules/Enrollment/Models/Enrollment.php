@@ -52,6 +52,20 @@ class Enrollment extends Model
             $hasAddress = !empty(trim((string) $enrollment->address));
             $enrollment->is_complete = $hasGuardian && $hasAddress;
         });
+
+        static::saved(function (Enrollment $enrollment) {
+            if ($enrollment->student_id) {
+                \Illuminate\Support\Facades\Cache::forget("student_enrollment_{$enrollment->student_id}");
+                \Illuminate\Support\Facades\Cache::forget("student_enrollment_status_{$enrollment->student_id}");
+            }
+        });
+
+        static::deleted(function (Enrollment $enrollment) {
+            if ($enrollment->student_id) {
+                \Illuminate\Support\Facades\Cache::forget("student_enrollment_{$enrollment->student_id}");
+                \Illuminate\Support\Facades\Cache::forget("student_enrollment_status_{$enrollment->student_id}");
+            }
+        });
     }
 
     public function student(): BelongsTo

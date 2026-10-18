@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, router, usePage } from "@inertiajs/react";
 import { useAuth } from "@/Hooks/useAuth";
+import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
 import OfflineBanner from "@/Components/Molecules/OfflineBanner";
 import {
     LayoutDashboard,
@@ -18,10 +19,12 @@ import {
     ShieldCheck,
     Layers,
     Server,
+    Building2,
 } from "lucide-react";
 
 export default function PortalLayout({ children, title = "Dashboard" }) {
     const { user } = useAuth();
+    const school = useSchoolSettings();
     const { url, props } = usePage();
     const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile drawer
     const [isCollapsed, setIsCollapsed] = useState(false); // Desktop collapse/expand
@@ -188,6 +191,11 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
                                 href: "/admin/queue-jobs",
                                 icon: Server,
                             },
+                            {
+                                name: "School Profile & Logo",
+                                href: "/admin/settings",
+                                icon: Building2,
+                            },
                         ],
                     },
                 ];
@@ -338,18 +346,26 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
                     {/* 1. Header with Logo & Brand */}
                     <div className="h-16 px-4 flex items-center justify-between border-b border-[#243556] bg-[#16223b] sticky top-0 z-10">
                         <div
-                            className={`flex items-center gap-3 ${isCollapsed ? "lg:justify-center lg:w-full" : ""}`}
+                            className={`flex items-center gap-3 ${isCollapsed ? "lg:justify-center lg:w-full" : "min-w-0"}`}
                         >
-                            <div className="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-md text-base ring-2 ring-emerald-400/30 shrink-0">
-                                B
-                            </div>
+                            {school.logo_url ? (
+                                <img
+                                    src={school.logo_url}
+                                    alt={school.short_name}
+                                    className="w-9 h-9 object-contain shrink-0 drop-shadow-sm"
+                                />
+                            ) : (
+                                <div className="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-md text-base ring-2 ring-emerald-400/30 shrink-0">
+                                    <span>{school.initial}</span>
+                                </div>
+                            )}
                             {!isCollapsed && (
-                                <div className="transition-opacity duration-200">
-                                    <h1 className="font-extrabold text-sm tracking-wider text-white uppercase whitespace-nowrap">
-                                        BNHS PORTAL
+                                <div className="transition-opacity duration-200 min-w-0">
+                                    <h1 className="font-extrabold text-sm tracking-wider text-white uppercase truncate">
+                                        {school.portal_title}
                                     </h1>
-                                    <p className="text-[10px] text-emerald-400 font-semibold tracking-wide whitespace-nowrap">
-                                        Bulusan National High
+                                    <p className="text-[10px] text-emerald-400 font-semibold tracking-wide truncate">
+                                        {school.short_name}
                                     </p>
                                 </div>
                             )}
@@ -602,25 +618,25 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
                 >
                     {!isCollapsed ? (
                         <div className="space-y-0.5">
-                            <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
-                                <span className="truncate">Bulusan NHS</span>
+                            <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 gap-2">
+                                <span className="truncate">{school.short_name}</span>
                                 <span className="font-mono text-emerald-400 text-[10px] bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.2 rounded shrink-0">
-                                    ID: 302196
+                                    ID: {school.school_id}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between text-[10px] text-slate-400">
+                            <div className="flex items-center justify-between text-[10px] text-slate-400 gap-2">
                                 <span>v2.4.0</span>
                                 <span className="truncate">
-                                    DepEd Region V SDO
+                                    {school.region}
                                 </span>
                             </div>
                         </div>
                     ) : (
                         <div
                             className="text-[10px] font-mono text-emerald-400 font-bold"
-                            title="Bulusan NHS • ID: 302196 • v2.4.0 DepEd Region V SDO"
+                            title={`${school.short_name} • ID: ${school.school_id} • v2.4.0 ${school.region}`}
                         >
-                            302196
+                            {school.school_id}
                         </div>
                     )}
                 </div>
@@ -658,7 +674,7 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
                                 {title}
                             </h2>
                             <p className="text-[11px] text-slate-400 hidden sm:block">
-                                Bulusan National High School • DepEd SSU OPAS
+                                {school.school_name} • {school.tagline}
                             </p>
                         </div>
                     </div>

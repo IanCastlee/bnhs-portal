@@ -60,7 +60,7 @@ const Input = forwardRef(function Input(
                     id={id}
                     type={actualType}
                     disabled={disabled}
-                    className={`w-full rounded-xl border text-xs sm:text-sm font-medium transition-all duration-150 h-11 sm:h-12 bg-slate-50/60 text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:outline-none focus:ring-2 ${
+                    className={`w-full rounded-xl border text-sm font-medium transition-all duration-150 ${/\bh-\S+/.test(className) ? "" : "h-14"} bg-slate-50/60 text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:outline-none focus:ring-2 ${
                         Icon ? "pl-11" : "pl-3.5"
                     } ${isPasswordType || rightElement ? "pr-11" : "pr-3.5"} ${
                         hasError

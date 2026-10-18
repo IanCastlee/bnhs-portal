@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Head, Link } from "@inertiajs/react";
+import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
 import OfflineBanner from "@/Components/Molecules/OfflineBanner";
 import AuthShowcasePanel from "@/Components/Organisms/Auth/AuthShowcasePanel";
 import PasswordStrengthMeter from "@/Components/Organisms/Auth/PasswordStrengthMeter";
@@ -26,6 +27,7 @@ import {
     Check,
     BookOpen,
     Sparkles,
+    School,
 } from "lucide-react";
 import {
     validateEmail,
@@ -41,6 +43,7 @@ import {
 
 // gradeLevels = [], strands = [] galing sa controller AuthController mula sa showRegister
 export default function Register({ gradeLevels = [], strands = [] }) {
+    const school = useSchoolSettings();
     // Step state: 1 = Applicant Type & Privacy Consent, 2 = Personal Information & Credentials
     const [step, setStep] = useState(1);
 
@@ -76,7 +79,7 @@ export default function Register({ gradeLevels = [], strands = [] }) {
             ? Object.values(strands)
             : [];
 
-    // Dynamic Default fallback strands if DB is empty
+    // Dynamic Default  strands if DB is empty
     const availableStrands =
         rawStrands.length > 0
             ? rawStrands
@@ -403,7 +406,9 @@ export default function Register({ gradeLevels = [], strands = [] }) {
 
     return (
         <div className="min-h-screen bg-slate-900 flex flex-col justify-between font-sans selection:bg-emerald-500 selection:text-white">
-            <Head title="Create Account - OPAS Pre-Admission (Bulusan NHS)" />
+            <Head
+                title={`Create Account - OPAS Pre-Admission (${school.short_name})`}
+            />
             <OfflineBanner />
 
             {/* Main Split Screen Grid */}
@@ -412,29 +417,62 @@ export default function Register({ gradeLevels = [], strands = [] }) {
                 <AuthShowcasePanel mode="register" />
 
                 {/* 💻 RIGHT SIDE: OPAS Pre-Admission Form Panel */}
-                <div className="lg:col-span-7 bg-slate-50 flex items-center justify-center p-3.5 sm:p-8 lg:p-12 min-h-screen">
+                <div className="lg:col-span-7 bg-slate-50 flex flex-col lg:items-center lg:justify-center p-0 sm:p-8 lg:p-12 min-h-screen">
+                    {/* 📱 MOBILE GREEN HERO BANNER WITH HALF-VISIBLE BLURRED WATERMARK LOGO */}
+                    <div className="lg:hidden relative overflow-hidden bg-gradient-to-br from-[#042219] via-[#0b4635] to-[#062d21] text-white px-5 pt-8 pb-14 shadow-lg w-full">
+                        {/* Ambient Glow */}
+                        <div className="pointer-events-none absolute -top-16 -left-16 w-48 h-48 rounded-full bg-emerald-400/15 blur-2xl" />
+
+                        {/* Half-Visible Blurred Watermark Logo on Right Edge */}
+                        {school.logo_url ? (
+                            <img
+                                src={school.logo_url}
+                                alt=""
+                                aria-hidden="true"
+                                className="pointer-events-none select-none absolute -right-16 -bottom-10 w-52 h-52 object-contain opacity-20 blur-[2px]"
+                            />
+                        ) : (
+                            <School
+                                aria-hidden="true"
+                                className="pointer-events-none select-none absolute -right-14 -bottom-10 w-48 h-48 text-emerald-300 opacity-15 blur-[2px]"
+                            />
+                        )}
+
+                        {/* Foreground Mobile Branding */}
+                        <div className="relative z-10 flex items-center gap-3.5">
+                            {school.logo_url ? (
+                                <img
+                                    src={school.logo_url}
+                                    alt={school.short_name}
+                                    className="w-12 h-12 object-contain shrink-0 drop-shadow-md"
+                                />
+                            ) : (
+                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/30 border border-emerald-300/30 flex items-center justify-center text-white font-black text-lg shadow-md shrink-0">
+                                    {school.initial}
+                                </div>
+                            )}
+                            <div className="min-w-0 pr-8">
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-400/15 border border-emerald-300/25 text-emerald-200 text-[10px] font-semibold mb-1">
+                                    <ShieldCheck className="w-3 h-3 text-emerald-300 shrink-0" />
+                                    <span>OPAS Pre-Admission Portal</span>
+                                </div>
+                                <h1 className="text-sm font-black tracking-tight text-white uppercase leading-snug">
+                                    {school.school_name}
+                                </h1>
+                                <p className="text-[11px] font-medium text-emerald-200/85 truncate mt-0.5">
+                                    {school.tagline}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div
-                        className={`w-full max-w-lg transition-all duration-300 ${
+                        className={`w-full max-w-lg mx-auto flex-1 lg:flex-initial flex flex-col justify-between lg:justify-center px-3.5 sm:px-0 -mt-6 sm:mt-0 relative z-20 transition-all duration-300 ${
                             shake ? "animate-shake" : ""
                         }`}
                     >
                         {/* OPAS Card */}
-                        <div className="bg-white rounded-2xl sm:rounded-3xl p-4.5 sm:p-8 shadow-xl shadow-slate-200/60 border border-slate-200/80 relative">
-                            {/* Mobile Mini Brand Header */}
-                            <div className="lg:hidden flex items-center gap-2.5 mb-4 pb-3.5 border-b border-slate-100">
-                                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-black text-xs shadow-md shadow-emerald-950/20 ring-2 ring-emerald-500/20 shrink-0">
-                                    B
-                                </div>
-                                <div className="min-w-0">
-                                    <h1 className="text-xs font-black tracking-tight text-slate-900 uppercase truncate">
-                                        Bulusan National High School
-                                    </h1>
-                                    <p className="text-[10px] font-semibold text-emerald-700">
-                                        DepEd SSU OPAS Pre-Admission
-                                    </p>
-                                </div>
-                            </div>
-
+                        <div className="bg-white rounded-3xl px-4.5 py-6 sm:p-8 shadow-xl shadow-slate-900/5 lg:shadow-slate-200/60 border border-slate-200/80">
                             {/* Title & Sign In Switcher */}
                             <div className="mb-4 sm:mb-5 pb-3.5 sm:pb-4 border-b border-slate-100">
                                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -572,8 +610,8 @@ export default function Register({ gradeLevels = [], strands = [] }) {
                                             Data Privacy Notice
                                         </h3>
                                         <p>
-                                            Bulusan National High School / DepEd
-                                            SSU OPAS processes your identity and
+                                            {school.school_name} / DepEd SSU
+                                            OPAS processes your identity and
                                             contact details, education records,
                                             program/strand choices, photographs
                                             and submitted documents to handle
@@ -714,12 +752,10 @@ export default function Register({ gradeLevels = [], strands = [] }) {
                                         size="lg"
                                         onClick={proceedToStep2}
                                         disabled={!hasConsented}
-                                        className="w-full mt-2"
+                                        className="w-full py-3.5 mt-2"
                                     >
-                                        <span>
-                                            Continue to Personal Information
-                                        </span>
-                                        <ArrowRight className="w-4 h-4 ml-2" />
+                                        <span>Continue</span>
+                                        <ArrowRight className="w-4 h-4" />
                                     </Button>
                                 </div>
                             )}
@@ -1080,15 +1116,15 @@ export default function Register({ gradeLevels = [], strands = [] }) {
                                     />
 
                                     {/* Action Buttons */}
-                                    <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 pt-2">
+                                    <div className="flex items-center gap-3 pt-2">
                                         <Button
                                             type="button"
                                             variant="outline"
                                             size="md"
                                             onClick={() => setStep(1)}
-                                            className="w-full sm:w-auto"
+                                            className="shrink-0 px-5 py-3.5"
                                         >
-                                            <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+                                            <ArrowLeft className="w-3.5 h-3.5" />
                                             <span>Back</span>
                                         </Button>
 
@@ -1098,7 +1134,7 @@ export default function Register({ gradeLevels = [], strands = [] }) {
                                             size="lg"
                                             loading={processing}
                                             disabled={processing}
-                                            className="w-full sm:flex-1"
+                                            className="flex-1 py-3.5"
                                         >
                                             <span className="truncate">
                                                 Submit
@@ -1111,8 +1147,8 @@ export default function Register({ gradeLevels = [], strands = [] }) {
 
                         {/* Footer Rights */}
                         <div className="mt-6 text-center text-xs text-slate-400">
-                            &copy; {new Date().getFullYear()} Bulusan National
-                            High School. All rights reserved.
+                            &copy; {new Date().getFullYear()}{" "}
+                            {school.school_name}. All rights reserved.
                         </div>
                     </div>
                 </div>

@@ -60,7 +60,11 @@ Route::middleware('auth')->group(function () {
     })->name('notifications.feed');
 
     Route::post('/notifications/mark-as-read', function () {
-        Auth::user()->unreadNotifications->markAsRead();
+        $user = Auth::user();
+        if ($user) {
+            $user->unreadNotifications()->update(['read_at' => now()]);
+            \Illuminate\Support\Facades\Cache::forget("user_unread_notifications_{$user->id}");
+        }
         return back();
     })->name('notifications.mark-as-read');
 });

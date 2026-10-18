@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Head } from "@inertiajs/react";
 import StudentLayout from "@/Layouts/StudentLayout";
+import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
 import Card from "@/Components/Atoms/Common/Card";
 import Badge from "@/Components/Atoms/Common/Badge";
 import Button from "@/Components/Atoms/Common/Button";
@@ -14,6 +15,7 @@ import {
     ShieldCheck,
     HelpCircle,
     Printer,
+    School,
 } from "lucide-react";
 
 export default function Grades({
@@ -22,6 +24,7 @@ export default function Grades({
     generalAverage = null,
     honorAward = null,
 }) {
+    const school = useSchoolSettings();
     const [selectedQuarter, setSelectedQuarter] = useState("all");
 
     // Fallback sample subjects if no grades recorded yet
@@ -44,13 +47,28 @@ export default function Grades({
 
     return (
         <StudentLayout title="Quarterly Grades & DepEd SF9">
-            <Head title="Quarterly Grades - Bulusan NHS" />
+            <Head title={`Quarterly Grades - ${school.short_name}`} />
 
-            <div className="space-y-4 sm:space-y-6">
-                {/* 🌟 BNHS Green Maximized Header Banner */}
-                <div className="-mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] rounded-b-3xl sm:rounded-2xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border-b sm:border border-emerald-400/20">
-                    <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
+            <div className="sm:space-y-6">
+                {/* 🌟 LAYER 1 (z-10): BNHS Green Maximized Header Banner Backdrop */}
+                <div className="relative z-10 -mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 bg-gradient-to-br from-[#042219] via-[#0b4635] to-[#062d21] sm:rounded-2xl px-5 pt-4 pb-12 sm:p-6 text-white shadow-xl overflow-hidden sm:border border-emerald-400/20">
+                    <div className="hidden sm:block absolute -top-12 -right-12 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
                     <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-teal-400/15 rounded-full blur-2xl pointer-events-none" />
+
+                    {/* Half-Visible Blurred Watermark Logo on Right Edge */}
+                    {school.logo_url ? (
+                        <img
+                            src={school.logo_url}
+                            alt=""
+                            aria-hidden="true"
+                            className="pointer-events-none select-none absolute -right-14 -bottom-6 w-48 h-48 sm:w-52 sm:h-52 object-contain opacity-20 blur-[2px]"
+                        />
+                    ) : (
+                        <School
+                            aria-hidden="true"
+                            className="pointer-events-none select-none absolute -right-12 -bottom-6 w-44 h-44 sm:w-48 sm:h-48 text-emerald-300 opacity-15 blur-[2px]"
+                        />
+                    )}
 
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
@@ -100,149 +118,152 @@ export default function Grades({
                     </div>
                 </div>
 
-                {/* Quarter Filter & SF9 Action Bar */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
-                    <div className="flex items-center gap-1.5 overflow-x-auto">
-                        {["all", "Q1", "Q2", "Q3", "Q4"].map((q) => (
-                            <button
-                                key={q}
-                                onClick={() => setSelectedQuarter(q)}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-                                    selectedQuarter === q
-                                        ? "bg-emerald-600 text-white shadow-xs"
-                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                }`}
-                            >
-                                {q === "all" ? "All Quarters" : `${q} Grading`}
-                            </button>
-                        ))}
+                {/* 📱 LAYER 2 (z-20): Overlapping Rounded Content Sheet on Mobile */}
+                <div className="relative z-20 -mt-6 sm:mt-0 -mx-2.5 sm:mx-0 px-3.5 pt-5 pb-2 sm:p-0 bg-[#f4f7fa] sm:bg-transparent rounded-t-3xl sm:rounded-none shadow-[0_-6px_20px_rgba(0,0,0,0.08)] sm:shadow-none space-y-4 sm:space-y-6">
+                    {/* Quarter Filter & SF9 Action Bar */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
+                        <div className="flex items-center gap-1.5 overflow-x-auto">
+                            {["all", "Q1", "Q2", "Q3", "Q4"].map((q) => (
+                                <button
+                                    key={q}
+                                    onClick={() => setSelectedQuarter(q)}
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                                        selectedQuarter === q
+                                            ? "bg-emerald-600 text-white shadow-xs"
+                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                    }`}
+                                >
+                                    {q === "all" ? "All Quarters" : `${q} Grading`}
+                                </button>
+                            ))}
+                        </div>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.print()}
+                            className="text-xs"
+                        >
+                            <Printer className="w-4 h-4 mr-1.5" />
+                            <span>Print Official DepEd SF9</span>
+                        </Button>
                     </div>
 
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.print()}
-                        className="text-xs"
-                    >
-                        <Printer className="w-4 h-4 mr-1.5" />
-                        <span>Print Official DepEd SF9</span>
-                    </Button>
-                </div>
-
-                {/* 📋 Official DepEd Form 138 / SF9 Grade Table */}
-                <Card className="rounded-2xl border border-slate-200/80 p-0 overflow-hidden bg-white shadow-xs">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-600 uppercase text-[10px] tracking-wider font-bold">
-                                    <th className="py-3.5 px-4">Learning Areas / Subjects</th>
-                                    {(selectedQuarter === "all" || selectedQuarter === "Q1") && (
-                                        <th className="py-3.5 px-3 text-center w-20">1</th>
-                                    )}
-                                    {(selectedQuarter === "all" || selectedQuarter === "Q2") && (
-                                        <th className="py-3.5 px-3 text-center w-20">2</th>
-                                    )}
-                                    {(selectedQuarter === "all" || selectedQuarter === "Q3") && (
-                                        <th className="py-3.5 px-3 text-center w-20">3</th>
-                                    )}
-                                    {(selectedQuarter === "all" || selectedQuarter === "Q4") && (
-                                        <th className="py-3.5 px-3 text-center w-20">4</th>
-                                    )}
-                                    {selectedQuarter === "all" && (
-                                        <th className="py-3.5 px-3 text-center w-28 bg-slate-100/60 font-black text-slate-900">
-                                            Final Grade
-                                        </th>
-                                    )}
-                                    <th className="py-3.5 px-4 text-center">Remarks</th>
-                                    <th className="py-3.5 px-4">Descriptor</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 text-slate-800">
-                                {displayGrades.map((g, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
-                                        <td className="py-3 px-4 font-bold text-slate-900">
-                                            <span>{g.subject_name}</span>
-                                            <span className="block text-[10px] font-mono text-slate-400 font-normal">
-                                                {g.subject_code} &bull; {g.teacher_name}
-                                            </span>
-                                        </td>
+                    {/* 📋 Official DepEd Form 138 / SF9 Grade Table */}
+                    <Card className="rounded-2xl border border-slate-200/80 p-0 overflow-hidden bg-white shadow-xs">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-600 uppercase text-[10px] tracking-wider font-bold">
+                                        <th className="py-3.5 px-4">Learning Areas / Subjects</th>
                                         {(selectedQuarter === "all" || selectedQuarter === "Q1") && (
-                                            <td className="py-3 px-3 text-center font-mono font-semibold">
-                                                {g.q1 !== null ? Number(g.q1).toFixed(0) : "--"}
-                                            </td>
+                                            <th className="py-3.5 px-3 text-center w-20">1</th>
                                         )}
                                         {(selectedQuarter === "all" || selectedQuarter === "Q2") && (
-                                            <td className="py-3 px-3 text-center font-mono font-semibold">
-                                                {g.q2 !== null ? Number(g.q2).toFixed(0) : "--"}
-                                            </td>
+                                            <th className="py-3.5 px-3 text-center w-20">2</th>
                                         )}
                                         {(selectedQuarter === "all" || selectedQuarter === "Q3") && (
-                                            <td className="py-3 px-3 text-center font-mono font-semibold">
-                                                {g.q3 !== null ? Number(g.q3).toFixed(0) : "--"}
-                                            </td>
+                                            <th className="py-3.5 px-3 text-center w-20">3</th>
                                         )}
                                         {(selectedQuarter === "all" || selectedQuarter === "Q4") && (
-                                            <td className="py-3 px-3 text-center font-mono font-semibold">
-                                                {g.q4 !== null ? Number(g.q4).toFixed(0) : "--"}
-                                            </td>
+                                            <th className="py-3.5 px-3 text-center w-20">4</th>
                                         )}
                                         {selectedQuarter === "all" && (
-                                            <td className="py-3 px-3 text-center bg-slate-100/60 font-mono font-black text-slate-900">
-                                                {g.final_grade !== null ? Number(g.final_grade).toFixed(2) : "--"}
-                                            </td>
+                                            <th className="py-3.5 px-3 text-center w-28 bg-slate-100/60 font-black text-slate-900">
+                                                Final Grade
+                                            </th>
                                         )}
-                                        <td className="py-3 px-4 text-center">
-                                            {g.remarks === "PASSED" ? (
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                    PASSED
-                                                </span>
-                                            ) : g.remarks === "FAILED" ? (
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-200">
-                                                    FAILED
-                                                </span>
-                                            ) : (
-                                                <span className="text-slate-400 text-[11px]">Ongoing</span>
-                                            )}
-                                        </td>
-                                        <td className="py-3 px-4 text-slate-600 text-[11px]">
-                                            {g.descriptor || "In Progress"}
-                                        </td>
+                                        <th className="py-3.5 px-4 text-center">Remarks</th>
+                                        <th className="py-3.5 px-4">Descriptor</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </Card>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 text-slate-800">
+                                    {displayGrades.map((g, idx) => (
+                                        <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
+                                            <td className="py-3 px-4 font-bold text-slate-900">
+                                                <span>{g.subject_name}</span>
+                                                <span className="block text-[10px] font-mono text-slate-400 font-normal">
+                                                    {g.subject_code} &bull; {g.teacher_name}
+                                                </span>
+                                            </td>
+                                            {(selectedQuarter === "all" || selectedQuarter === "Q1") && (
+                                                <td className="py-3 px-3 text-center font-mono font-semibold">
+                                                    {g.q1 !== null ? Number(g.q1).toFixed(0) : "--"}
+                                                </td>
+                                            )}
+                                            {(selectedQuarter === "all" || selectedQuarter === "Q2") && (
+                                                <td className="py-3 px-3 text-center font-mono font-semibold">
+                                                    {g.q2 !== null ? Number(g.q2).toFixed(0) : "--"}
+                                                </td>
+                                            )}
+                                            {(selectedQuarter === "all" || selectedQuarter === "Q3") && (
+                                                <td className="py-3 px-3 text-center font-mono font-semibold">
+                                                    {g.q3 !== null ? Number(g.q3).toFixed(0) : "--"}
+                                                </td>
+                                            )}
+                                            {(selectedQuarter === "all" || selectedQuarter === "Q4") && (
+                                                <td className="py-3 px-3 text-center font-mono font-semibold">
+                                                    {g.q4 !== null ? Number(g.q4).toFixed(0) : "--"}
+                                                </td>
+                                            )}
+                                            {selectedQuarter === "all" && (
+                                                <td className="py-3 px-3 text-center bg-slate-100/60 font-mono font-black text-slate-900">
+                                                    {g.final_grade !== null ? Number(g.final_grade).toFixed(2) : "--"}
+                                                </td>
+                                            )}
+                                            <td className="py-3 px-4 text-center">
+                                                {g.remarks === "PASSED" ? (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                        PASSED
+                                                    </span>
+                                                ) : g.remarks === "FAILED" ? (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-200">
+                                                        FAILED
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-slate-400 text-[11px]">Ongoing</span>
+                                                )}
+                                            </td>
+                                            <td className="py-3 px-4 text-slate-600 text-[11px]">
+                                                {g.descriptor || "In Progress"}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
 
-                {/* 🌟 DepEd Observed Values (SF9 Core Values) */}
-                <Card className="rounded-2xl border border-slate-200/80 p-5 bg-white shadow-xs space-y-3">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                        <h3 className="font-black text-sm text-slate-900 flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                            Report on Learner's Observed Values (Core Values)
-                        </h3>
-                        <span className="text-[10px] text-slate-400 font-medium">
-                            AO = Always Observed &bull; SO = Sometimes Observed &bull; NO = Not Observed
-                        </span>
-                    </div>
+                    {/* 🌟 DepEd Observed Values (SF9 Core Values) */}
+                    <Card className="rounded-2xl border border-slate-200/80 p-5 bg-white shadow-xs space-y-3">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <h3 className="font-black text-sm text-slate-900 flex items-center gap-2">
+                                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                                Report on Learner's Observed Values (Core Values)
+                            </h3>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                                AO = Always Observed &bull; SO = Sometimes Observed &bull; NO = Not Observed
+                            </span>
+                        </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        {coreValues.map((cv, idx) => (
-                            <div key={idx} className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-                                <span className="font-black text-slate-900">{cv.coreValue}</span>
-                                {cv.statements.map((stmt, sIdx) => (
-                                    <div key={sIdx} className="flex items-center justify-between text-slate-600 text-[11px]">
-                                        <span className="leading-snug pr-2">&bull; {stmt}</span>
-                                        <span className="font-mono font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded text-[10px]">
-                                            {cv.q1}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                </Card>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                            {coreValues.map((cv, idx) => (
+                                <div key={idx} className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
+                                    <span className="font-black text-slate-900">{cv.coreValue}</span>
+                                    {cv.statements.map((stmt, sIdx) => (
+                                        <div key={sIdx} className="flex items-center justify-between text-slate-600 text-[11px]">
+                                            <span className="leading-snug pr-2">&bull; {stmt}</span>
+                                            <span className="font-mono font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded text-[10px]">
+                                                {cv.q1}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+                </div>
             </div>
         </StudentLayout>
     );

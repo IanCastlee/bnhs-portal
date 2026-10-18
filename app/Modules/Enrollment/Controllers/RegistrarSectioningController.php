@@ -50,7 +50,7 @@ class RegistrarSectioningController extends Controller
     public function index(Request $request): Response
     {
         $user = Auth::user();
-        $activeYear = AcademicYear::where('is_active', true)->first();
+        $activeYear = AcademicYear::getCachedActive();
         if ($request->has('academic_year_id')) {
             $academicYearId = $request->query('academic_year_id');
             session(['registrar_academic_year_id' => $academicYearId]);

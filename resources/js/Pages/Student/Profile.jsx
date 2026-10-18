@@ -4,6 +4,7 @@ import StudentLayout from "@/Layouts/StudentLayout";
 import Card from "@/Components/Atoms/Common/Card";
 import Badge from "@/Components/Atoms/Common/Badge";
 import { useAuth } from "@/Hooks/useAuth";
+import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
 import { formatLRN } from "@/Utils/formatters";
 import { compressIdPhoto } from "@/Utils/compressImage";
 import {
@@ -24,6 +25,7 @@ import {
 
 export default function Profile({ enrollment }) {
     const { user } = useAuth();
+    const school = useSchoolSettings();
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false);
     const [previewAvatar, setPreviewAvatar] = useState(user?.avatar_path || null);
@@ -68,13 +70,28 @@ export default function Profile({ enrollment }) {
 
     return (
         <StudentLayout title="My Profile & LRN">
-            <Head title="My Profile - Bulusan NHS" />
+            <Head title={`My Profile - ${school.short_name}`} />
 
-            <div className="space-y-4 sm:space-y-6">
-                {/* 🌟 BNHS Green Maximized Header Banner */}
-                <div className="-mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] rounded-b-3xl sm:rounded-2xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border-b sm:border border-emerald-400/20">
-                    <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
+            <div className="sm:space-y-6">
+                {/* 🌟 LAYER 1 (z-10): BNHS Green Maximized Header Banner Backdrop */}
+                <div className="relative z-10 -mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 bg-gradient-to-br from-[#042219] via-[#0b4635] to-[#062d21] sm:rounded-2xl px-5 pt-4 pb-12 sm:p-6 text-white shadow-xl overflow-hidden sm:border border-emerald-400/20">
+                    <div className="hidden sm:block absolute -top-12 -right-12 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
                     <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-teal-400/15 rounded-full blur-2xl pointer-events-none" />
+
+                    {/* Half-Visible Blurred Watermark Logo on Right Edge */}
+                    {school.logo_url ? (
+                        <img
+                            src={school.logo_url}
+                            alt=""
+                            aria-hidden="true"
+                            className="pointer-events-none select-none absolute -right-14 -bottom-6 w-48 h-48 sm:w-52 sm:h-52 object-contain opacity-20 blur-[2px]"
+                        />
+                    ) : (
+                        <School
+                            aria-hidden="true"
+                            className="pointer-events-none select-none absolute -right-12 -bottom-6 w-44 h-44 sm:w-48 sm:h-48 text-emerald-300 opacity-15 blur-[2px]"
+                        />
+                    )}
 
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div className="flex items-center gap-4">
@@ -142,99 +159,102 @@ export default function Profile({ enrollment }) {
                     </div>
                 </div>
 
-                {/* Profile Details Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left 2 Cols: Detailed Demographic Information */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
-                            <h3 className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
-                                <UserCircle className="w-4 h-4 text-emerald-600" />
-                                Official Learner Identification
-                            </h3>
+                {/* 📱 LAYER 2 (z-20): Overlapping Rounded Content Sheet on Mobile */}
+                <div className="relative z-20 -mt-6 sm:mt-0 -mx-2.5 sm:mx-0 px-3.5 pt-5 pb-2 sm:p-0 bg-[#f4f7fa] sm:bg-transparent rounded-t-3xl sm:rounded-none shadow-[0_-6px_20px_rgba(0,0,0,0.08)] sm:shadow-none">
+                    {/* Profile Details Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Left 2 Cols: Detailed Demographic Information */}
+                        <div className="lg:col-span-2 space-y-6">
+                            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+                                <h3 className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                                    <UserCircle className="w-4 h-4 text-emerald-600" />
+                                    Official Learner Identification
+                                </h3>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Full Legal Name</p>
-                                    <p className="font-bold text-slate-900 mt-1">{user?.name || "Juan Dimagiba Dela Cruz"}</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Full Legal Name</p>
+                                        <p className="font-bold text-slate-900 mt-1">{user?.name || "Juan Dimagiba Dela Cruz"}</p>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase">DepEd LRN (12 Digits)</p>
+                                        <p className="font-mono font-bold text-emerald-700 mt-1">{formatLRN(user?.lrn || "102938475612")}</p>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Date of Birth / Age</p>
+                                        <p className="font-bold text-slate-900 mt-1">October 14, 2013 (13 y/o)</p>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Sex / Gender</p>
+                                        <p className="font-bold text-slate-900 mt-1">Male</p>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Email Address</p>
+                                        <p className="font-bold text-slate-900 mt-1">{user?.email || "student@bnhs.edu.ph"}</p>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Residential Address</p>
+                                        <p className="font-bold text-slate-900 mt-1">Brgy. Central, Bulusan, Sorsogon</p>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">DepEd LRN (12 Digits)</p>
-                                    <p className="font-mono font-bold text-emerald-700 mt-1">{formatLRN(user?.lrn || "102938475612")}</p>
-                                </div>
+                            {/* Guardian Information */}
+                            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+                                <h3 className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                                    <Shield className="w-4 h-4 text-emerald-600" />
+                                    Parent / Guardian &amp; Emergency Contact
+                                </h3>
 
-                                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Date of Birth / Age</p>
-                                    <p className="font-bold text-slate-900 mt-1">October 14, 2013 (13 y/o)</p>
-                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Father's Name</p>
+                                        <p className="font-bold text-slate-900 mt-1">Eduardo Dela Cruz</p>
+                                        <p className="text-[11px] text-slate-500 mt-0.5">📞 0917-849-2011</p>
+                                    </div>
 
-                                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Sex / Gender</p>
-                                    <p className="font-bold text-slate-900 mt-1">Male</p>
-                                </div>
-
-                                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Email Address</p>
-                                    <p className="font-bold text-slate-900 mt-1">{user?.email || "student@bnhs.edu.ph"}</p>
-                                </div>
-
-                                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Residential Address</p>
-                                    <p className="font-bold text-slate-900 mt-1">Brgy. Central, Bulusan, Sorsogon</p>
+                                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Mother's Maiden Name</p>
+                                        <p className="font-bold text-slate-900 mt-1">Lourdes Dimagiba</p>
+                                        <p className="text-[11px] text-slate-500 mt-0.5">📞 0920-394-1823</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Guardian Information */}
-                        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
-                            <h3 className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
-                                <Shield className="w-4 h-4 text-emerald-600" />
-                                Parent / Guardian &amp; Emergency Contact
-                            </h3>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Father's Name</p>
-                                    <p className="font-bold text-slate-900 mt-1">Eduardo Dela Cruz</p>
-                                    <p className="text-[11px] text-slate-500 mt-0.5">📞 0917-849-2011</p>
+                        {/* Right Col: Digital Student ID & Security Card */}
+                        <div className="space-y-6">
+                            <div className="bg-gradient-to-br from-[#1b2a47] to-[#121c30] text-white p-6 rounded-2xl shadow-lg border border-[#2a3c61] text-center space-y-4">
+                                <div className="flex items-center justify-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                                    <School className="w-4 h-4" />
+                                    <span>Digital Student ID Badge</span>
                                 </div>
 
-                                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Mother's Maiden Name</p>
-                                    <p className="font-bold text-slate-900 mt-1">Lourdes Dimagiba</p>
-                                    <p className="text-[11px] text-slate-500 mt-0.5">📞 0920-394-1823</p>
+                                <div className="w-24 h-24 mx-auto rounded-2xl bg-white p-2 shadow-inner flex items-center justify-center">
+                                    <QrCode className="w-full h-full text-slate-900" />
+                                </div>
+
+                                <div>
+                                    <h4 className="font-black text-base text-white">{user?.name || "Juan Dela Cruz"}</h4>
+                                    <p className="text-xs text-emerald-300 font-mono mt-0.5">{formatLRN(user?.lrn || "102938475612")}</p>
+                                    <p className="text-[11px] text-slate-400 mt-1">Valid for S.Y. 2026-2027</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Right Col: Digital Student ID & Security Card */}
-                    <div className="space-y-6">
-                        <div className="bg-gradient-to-br from-[#1b2a47] to-[#121c30] text-white p-6 rounded-2xl shadow-lg border border-[#2a3c61] text-center space-y-4">
-                            <div className="flex items-center justify-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                                <School className="w-4 h-4" />
-                                <span>Digital Student ID Badge</span>
+                            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-3">
+                                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                    <KeyRound className="w-4 h-4 text-emerald-600" />
+                                    Account Security
+                                </h4>
+                                <p className="text-xs text-slate-500">
+                                    You are signed in via DepEd Single Sign-On (SSO). Password changes must be coordinated with the school registrar.
+                                </p>
                             </div>
-
-                            <div className="w-24 h-24 mx-auto rounded-2xl bg-white p-2 shadow-inner flex items-center justify-center">
-                                <QrCode className="w-full h-full text-slate-900" />
-                            </div>
-
-                            <div>
-                                <h4 className="font-black text-base text-white">{user?.name || "Juan Dela Cruz"}</h4>
-                                <p className="text-xs text-emerald-300 font-mono mt-0.5">{formatLRN(user?.lrn || "102938475612")}</p>
-                                <p className="text-[11px] text-slate-400 mt-1">Valid for S.Y. 2026-2027</p>
-                            </div>
-                        </div>
-
-                        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-3">
-                            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                                <KeyRound className="w-4 h-4 text-emerald-600" />
-                                Account Security
-                            </h4>
-                            <p className="text-xs text-slate-500">
-                                You are signed in via DepEd Single Sign-On (SSO). Password changes must be coordinated with the school registrar.
-                            </p>
                         </div>
                     </div>
                 </div>

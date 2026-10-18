@@ -70,4 +70,8 @@ Route::middleware(['auth', 'role:ADMIN'])->prefix('admin')->name('admin.')->grou
     Route::patch('/academic-years/{academicYear}/enrollment', [\App\Modules\Academic\Controllers\AdminAcademicYearController::class, 'toggleEnrollment'])->name('academic-years.toggle-enrollment');
     Route::patch('/academic-years/{academicYear}/grading', [\App\Modules\Academic\Controllers\AdminAcademicYearController::class, 'toggleGrading'])->name('academic-years.toggle-grading');
     Route::delete('/academic-years/{academicYear}', [\App\Modules\Academic\Controllers\AdminAcademicYearController::class, 'destroy'])->name('academic-years.destroy');
+
+    // School Branding, Name & Logo Settings (Global Cached)
+    Route::get('/settings', [\App\Modules\Academic\Controllers\AdminSchoolSettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [\App\Modules\Academic\Controllers\AdminSchoolSettingController::class, 'update'])->name('settings.update');
 });

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
+import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
 import {
     School,
     ShieldCheck,
@@ -11,6 +12,7 @@ import {
 
 export default function AuthShowcasePanel({ mode = "login" }) {
     const isLogin = mode === "login";
+    const school = useSchoolSettings();
 
     return (
         <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-[#031d16] via-[#093d2e] to-[#042017] text-white p-8 lg:p-12 flex-col justify-between relative overflow-hidden border-r border-emerald-800/40 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto no-scrollbar">
@@ -19,18 +21,41 @@ export default function AuthShowcasePanel({ mode = "login" }) {
             <div className="absolute top-1/2 -right-24 w-96 h-96 bg-teal-400/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 left-1/4 w-80 h-80 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
 
+            {/* Half-Visible Blurred Watermark Logo on Right Edge */}
+            {school.logo_url ? (
+                <img
+                    src={school.logo_url}
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none select-none absolute -right-32 top-1/4 w-96 h-96 object-contain opacity-10 blur-[3px]"
+                />
+            ) : (
+                <School
+                    aria-hidden="true"
+                    className="pointer-events-none select-none absolute -right-28 top-1/4 w-88 h-88 text-emerald-300 opacity-10 blur-[3px]"
+                />
+            )}
+
             {/* Top Branding Section */}
             <div className="relative z-10">
                 <div className="flex items-center gap-3.5 mb-6">
-                    <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-xl shadow-emerald-950/60 ring-2 ring-emerald-400/30 p-2.5">
-                        <School className="w-full h-full stroke-[2.2]" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg sm:text-xl font-black tracking-tight leading-tight text-white drop-shadow-sm">
-                            BULUSAN NATIONAL HIGH SCHOOL
+                    {school.logo_url ? (
+                        <img
+                            src={school.logo_url}
+                            alt={school.short_name}
+                            className="w-13 h-13 object-contain shrink-0 drop-shadow-md"
+                        />
+                    ) : (
+                        <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-xl shadow-emerald-950/60 ring-2 ring-emerald-400/30 p-2.5 shrink-0">
+                            <School className="w-full h-full stroke-[2.2]" />
+                        </div>
+                    )}
+                    <div className="min-w-0">
+                        <h1 className="text-lg sm:text-xl font-black tracking-tight leading-tight text-white drop-shadow-sm uppercase">
+                            {school.school_name}
                         </h1>
-                        <p className="text-[11px] font-semibold text-emerald-300 tracking-wider uppercase">
-                            DepEd SSU OPAS &amp; BEEF Portal
+                        <p className="text-[11px] font-semibold text-emerald-300 tracking-wider uppercase truncate">
+                            {school.tagline}
                         </p>
                     </div>
                 </div>
@@ -45,16 +70,16 @@ export default function AuthShowcasePanel({ mode = "login" }) {
                     <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
                         {isLogin ? (
                             <>
-                                Welcome Back, <br />
+                                Welcome Back to <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-teal-200 to-amber-200">
-                                    Bulusaneño!
+                                    {school.short_name}!
                                 </span>
                             </>
                         ) : (
                             <>
                                 Begin Your Journey at <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-teal-200 to-amber-200">
-                                    Bulusan NHS
+                                    {school.short_name}
                                 </span>
                             </>
                         )}

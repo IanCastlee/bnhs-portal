@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Head, router, usePage, Link } from "@inertiajs/react";
 import StudentLayout from "@/Layouts/StudentLayout";
+import useSchoolSettings from "@/Hooks/useSchoolSettings";
 import AdmissionBanner from "@/Components/Organisms/Student/Admission/AdmissionBanner";
 import AdmissionStepper from "@/Components/Organisms/Student/Admission/AdmissionStepper";
 import StepProfileLrn from "@/Components/Organisms/Student/Admission/StepProfileLrn";
@@ -34,6 +35,7 @@ export default function Admission({
     queuePosition = null,
 }) {
     const { auth } = usePage().props;
+    const school = useSchoolSettings();
     const user = auth?.user || enrollment?.student;
 
     const [isReEnrolling, setIsReEnrolling] = useState(false);
@@ -143,15 +145,29 @@ export default function Admission({
 
     return (
         <StudentLayout title="Online Admission & BEEF Hub">
-            <Head title="DepEd BEEF Admission - Bulusan NHS" />
+            <Head title={`DepEd BEEF Admission - ${school.short_name}`} />
 
             {/* 🖥️ INTERACTIVE SCREEN UI (Hidden when printing) */}
             <div className="print:hidden space-y-4 sm:space-y-6 w-full pb-16">
                 {/* 🌟 SCENARIO A: OLD STUDENT FAST-TRACK RE-ENROLLMENT CARD (When not yet enrolled in active S.Y.) */}
                 {!enrollment && previousEnrollment ? (
-                    <div className="space-y-6 animate-fadeIn">
-                        {/* Welcome Banner */}
-                        <div className="bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                    <div className="animate-fadeIn">
+                        {/* LAYER 1 (z-10): Welcome Banner */}
+                        <div className="-mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] rounded-none sm:rounded-3xl p-5 pb-12 sm:p-8 text-white shadow-xl relative z-10 overflow-hidden">
+                            {/* Half-Visible Blurred School Logo Watermark on Right Edge */}
+                            {school.logo_url ? (
+                                <img
+                                    src={school.logo_url}
+                                    alt=""
+                                    aria-hidden="true"
+                                    className="pointer-events-none select-none absolute -right-14 -bottom-6 w-52 h-52 object-contain opacity-25 blur-[2px] rotate-[-10deg] sm:w-64 sm:h-64 sm:-right-12 sm:-bottom-8 sm:opacity-15 sm:blur-[1px]"
+                                />
+                            ) : (
+                                <GraduationCap
+                                    aria-hidden="true"
+                                    className="pointer-events-none select-none absolute -right-12 -bottom-6 w-48 h-48 text-emerald-300 opacity-15 blur-[2px] rotate-[-12deg]"
+                                />
+                            )}
                             <div className="relative z-10 space-y-2">
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-bold border border-emerald-400/30">
                                     <Sparkles className="w-3.5 h-3.5" />
@@ -161,12 +177,13 @@ export default function Admission({
                                     Mabuhay muli, {user?.name}! 👋
                                 </h2>
                                 <p className="text-emerald-100 text-xs sm:text-sm max-w-2xl leading-relaxed">
-                                    Binubuksan na ng Bulusan NHS ang opisyal na Re-Enrollment para sa bagong <strong>School Year {activeSchoolYear?.name || "2027-2028"}</strong>.
+                                    Binubuksan na ng {school.short_name} ang opisyal na Re-Enrollment para sa bagong <strong>School Year {activeSchoolYear?.name || "2027-2028"}</strong>.
                                 </p>
                             </div>
                         </div>
 
-                        {/* Promotion Details Card */}
+                        {/* LAYER 2 (z-20): Overlapping Content Sheet */}
+                        <div className="relative z-20 -mt-6 sm:mt-6 -mx-2.5 sm:mx-0 px-3.5 pt-5 sm:p-0 rounded-t-3xl sm:rounded-none bg-[#f4f7fa] sm:bg-transparent shadow-[0_-6px_20px_rgba(0,0,0,0.08)] sm:shadow-none">
                         <Card className="rounded-3xl border border-emerald-200/90 p-6 sm:p-8 bg-emerald-50/50 shadow-sm space-y-6">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-emerald-200/70">
                                 <div className="flex items-center gap-3.5">
@@ -219,7 +236,7 @@ export default function Admission({
                             {/* Action Form */}
                             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <p className="text-xs text-slate-500 leading-relaxed max-w-lg">
-                                    Dahil ikaw ay continuing student ng Bulusan NHS, hindi mo na kailangang mag-upload muli ng PSA at Form 137. I-click lamang ang button sa kanan upang kumpirmahin ang iyong pagpasok sa <strong>{promotedGradeLevel?.name || "Grade 8"}</strong>.
+                                    Dahil ikaw ay continuing student ng {school.short_name}, hindi mo na kailangang mag-upload muli ng PSA at Form 137. I-click lamang ang button sa kanan upang kumpirmahin ang iyong pagpasok sa <strong>{promotedGradeLevel?.name || "Grade 8"}</strong>.
                                 </p>
 
                                 <Button
@@ -245,10 +262,11 @@ export default function Admission({
                                 </Button>
                             </div>
                         </Card>
+                        </div>
                     </div>
                 ) : (
                     /* 🌟 SCENARIO B: STANDARD 4-STEP ADMISSION WIZARD (New / In-Progress Applications) */
-                    <>
+                    <div className="sm:space-y-6">
                         <AdmissionBanner
                             enrollment={enrollment}
                             queuePosition={queuePosition}
@@ -258,66 +276,69 @@ export default function Admission({
                             onPrint={() => window.print()}
                         />
 
-                        <AdmissionStepper
-                            stepsMeta={stepsMeta}
-                            activeStep={activeStep}
-                            setActiveStep={setActiveStep}
-                            progressPercentage={progressPercentage}
-                            completedStepsCount={completedStepsCount}
-                        />
-
-                        {activeStep === 1 && (
-                            <StepProfileLrn
-                                user={user}
-                                enrollment={enrollment}
-                                onNext={() => setActiveStep(2)}
+                        {/* 📱 LAYER 2 (z-20): Overlapping Rounded Content Sheet on Mobile */}
+                        <div className="relative z-20 -mt-6 sm:mt-0 -mx-2.5 sm:mx-0 px-3.5 pt-5 pb-2 sm:p-0 bg-[#f4f7fa] sm:bg-transparent rounded-t-3xl sm:rounded-none shadow-[0_-6px_20px_rgba(0,0,0,0.08)] sm:shadow-none space-y-4 sm:space-y-6">
+                            <AdmissionStepper
+                                stepsMeta={stepsMeta}
+                                activeStep={activeStep}
+                                setActiveStep={setActiveStep}
+                                progressPercentage={progressPercentage}
+                                completedStepsCount={completedStepsCount}
                             />
-                        )}
 
-                        {activeStep === 2 && (
-                            <StepHouseholdInfo
-                                householdData={householdData}
-                                setHouseholdData={setHouseholdData}
-                                isSavingHousehold={isSavingHousehold}
-                                saveHouseholdSuccess={saveHouseholdSuccess}
-                                isStep2Complete={isStep2Complete}
-                                isOldStudent={isOldStudent}
-                                isApproved={isApproved}
-                                onSubmit={(e) => {
-                                    if (isApproved) {
-                                        setActiveStep(3);
-                                    } else {
-                                        handleSaveHousehold(e, true);
-                                    }
-                                }}
-                                onBack={() => setActiveStep(1)}
-                            />
-                        )}
+                            {activeStep === 1 && (
+                                <StepProfileLrn
+                                    user={user}
+                                    enrollment={enrollment}
+                                    onNext={() => setActiveStep(2)}
+                                />
+                            )}
 
-                        {activeStep === 3 && (
-                            <StepPhysicalRequirements
-                                enrollment={enrollment}
-                                trackingNo={trackingNo}
-                                queuePosition={queuePosition}
-                                isApproved={isApproved}
-                                onPrintSlip={() => window.print()}
-                                onBack={() => setActiveStep(2)}
-                                onNext={() => setActiveStep(4)}
-                            />
-                        )}
+                            {activeStep === 2 && (
+                                <StepHouseholdInfo
+                                    householdData={householdData}
+                                    setHouseholdData={setHouseholdData}
+                                    isSavingHousehold={isSavingHousehold}
+                                    saveHouseholdSuccess={saveHouseholdSuccess}
+                                    isStep2Complete={isStep2Complete}
+                                    isOldStudent={isOldStudent}
+                                    isApproved={isApproved}
+                                    onSubmit={(e) => {
+                                        if (isApproved) {
+                                            setActiveStep(3);
+                                        } else {
+                                            handleSaveHousehold(e, true);
+                                        }
+                                    }}
+                                    onBack={() => setActiveStep(1)}
+                                />
+                            )}
 
-                        {activeStep === 4 && (
-                            <StepSectioningStatus
-                                isApproved={isApproved}
-                                queuePosition={queuePosition}
-                                trackingNo={trackingNo}
-                                enrollment={enrollment}
-                                onBack={() => setActiveStep(3)}
-                                onGoToHousehold={() => setActiveStep(2)}
-                                onPrint={() => window.print()}
-                            />
-                        )}
-                    </>
+                            {activeStep === 3 && (
+                                <StepPhysicalRequirements
+                                    enrollment={enrollment}
+                                    trackingNo={trackingNo}
+                                    queuePosition={queuePosition}
+                                    isApproved={isApproved}
+                                    onPrintSlip={() => window.print()}
+                                    onBack={() => setActiveStep(2)}
+                                    onNext={() => setActiveStep(4)}
+                                />
+                            )}
+
+                            {activeStep === 4 && (
+                                <StepSectioningStatus
+                                    isApproved={isApproved}
+                                    queuePosition={queuePosition}
+                                    trackingNo={trackingNo}
+                                    enrollment={enrollment}
+                                    onBack={() => setActiveStep(3)}
+                                    onGoToHousehold={() => setActiveStep(2)}
+                                    onPrint={() => window.print()}
+                                />
+                            )}
+                        </div>
+                    </div>
                 )}
             </div>
 

@@ -1,7 +1,8 @@
 import React from "react";
 import Badge from "@/Components/Atoms/Common/Badge";
 import Button from "@/Components/Atoms/Common/Button";
-import { GraduationCap, Download, Clock, AlertTriangle } from "lucide-react";
+import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
+import { GraduationCap, Download, Clock, AlertTriangle, School } from "lucide-react";
 
 export default function AdmissionBanner({
     enrollment,
@@ -11,16 +12,32 @@ export default function AdmissionBanner({
     isApproved,
     onPrint,
 }) {
+    const school = useSchoolSettings();
     const isRejected = enrollment?.status === "REJECTED";
 
     return (
-        <div className={`-mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 rounded-b-3xl sm:rounded-2xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border-b sm:border ${
+        <div className={`relative z-10 -mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 sm:rounded-2xl px-5 pt-4 pb-12 sm:p-6 text-white shadow-xl overflow-hidden sm:border ${
             isRejected
-                ? "bg-gradient-to-r from-[#3b0d0d] via-[#5c1d1d] to-[#451010] border-rose-500/30"
-                : "bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] border-emerald-400/20"
+                ? "bg-gradient-to-br from-[#3b0d0d] via-[#5c1d1d] to-[#451010] border-rose-500/30"
+                : "bg-gradient-to-br from-[#042219] via-[#0b4635] to-[#062d21] border-emerald-400/20"
         }`}>
-            <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
+            <div className="hidden sm:block absolute -top-12 -right-12 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-teal-400/15 rounded-full blur-2xl pointer-events-none" />
+
+            {/* Half-Visible Blurred Watermark Logo on Right Edge */}
+            {school.logo_url ? (
+                <img
+                    src={school.logo_url}
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none select-none absolute -right-14 -bottom-6 w-48 h-48 sm:w-52 sm:h-52 object-contain opacity-20 blur-[2px]"
+                />
+            ) : (
+                <School
+                    aria-hidden="true"
+                    className="pointer-events-none select-none absolute -right-12 -bottom-6 w-44 h-44 sm:w-48 sm:h-48 text-emerald-300 opacity-15 blur-[2px]"
+                />
+            )}
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
@@ -59,7 +76,7 @@ export default function AdmissionBanner({
                         Basic Education Enrollment Record
                     </h2>
                     <p className="text-emerald-100 text-xs sm:text-sm mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span>Bulusan NHS</span>
+                        <span>{school.short_name}</span>
                         <span className="text-emerald-300/40 hidden sm:inline">•</span>
                         <span>{(enrollment?.grade_level?.name || enrollment?.gradeLevel?.name || "Grade 7")} ({enrollment?.student_type || "NEW"} Student)</span>
                     </p>

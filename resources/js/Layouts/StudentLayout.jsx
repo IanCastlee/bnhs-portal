@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, router, usePage } from "@inertiajs/react";
 import { useAuth } from "@/Hooks/useAuth";
+import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
 import OfflineBanner from "@/Components/Molecules/OfflineBanner";
 import NotificationBell from "@/Components/Molecules/NotificationBell";
 import {
@@ -23,6 +24,7 @@ import {
 export default function StudentLayout({ children, title = "Student Portal" }) {
     const { user } = useAuth();
     const { url, props } = usePage();
+    const school = useSchoolSettings();
     const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile drawer
     const [isCollapsed, setIsCollapsed] = useState(false); // Desktop collapse/expand
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -203,8 +205,6 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
             {/* ⚡ Offline Connection Banner */}
             <OfflineBanner />
 
-
-
             {/* 💻 FLAT ABLE THEMED FIXED NON-SCROLLING SIDEBAR (Desktop) */}
             <aside
                 className={`hidden lg:flex inset-y-0 left-0 z-50 h-screen bg-[#1b2a47] text-white flex-col justify-between transition-all duration-300 ease-in-out shadow-2xl shrink-0 print:hidden ${
@@ -215,17 +215,29 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                 <div className="overflow-y-auto flex-1 custom-scrollbar overflow-x-hidden">
                     {/* 1. Header with Logo & Brand */}
                     <div className="h-16 px-4 flex items-center justify-between border-b border-[#243556] bg-[#16223b] sticky top-0 z-10">
-                        <div className={`flex items-center gap-3 ${isCollapsed ? "lg:justify-center lg:w-full" : ""}`}>
-                            <div className="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-md text-base ring-2 ring-emerald-400/30 shrink-0">
-                                B
-                            </div>
+                        <div
+                            className={`flex items-center gap-3 min-w-0 ${isCollapsed ? "lg:justify-center lg:w-full" : ""}`}
+                        >
+                            {school.logo_url ? (
+                                <img
+                                    src={school.logo_url}
+                                    alt={school.short_name}
+                                    className="w-9 h-9 object-contain shrink-0 drop-shadow-sm"
+                                />
+                            ) : (
+                                <div className="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-md text-base ring-2 ring-emerald-400/30 shrink-0">
+                                    {school.initial}
+                                </div>
+                            )}
                             {!isCollapsed && (
-                                <div className="transition-opacity duration-200">
-                                    <h1 className="font-extrabold text-sm tracking-wider text-white uppercase whitespace-nowrap">
-                                        BNHS PORTAL
+                                <div className="transition-opacity duration-200 min-w-0">
+                                    <h1 className="font-extrabold text-sm tracking-wider text-white uppercase truncate">
+                                        {school.portal_title}
                                     </h1>
-                                    <p className="text-[10px] text-emerald-400 font-semibold tracking-wide whitespace-nowrap">
-                                        {isPending ? "Applicant Access" : "Student Access"}
+                                    <p className="text-[10px] text-emerald-400 font-semibold tracking-wide truncate">
+                                        {isPending
+                                            ? "Applicant Access"
+                                            : "Student Access"}
                                     </p>
                                 </div>
                             )}
@@ -233,21 +245,38 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                     </div>
 
                     {/* 2. User Profile Box */}
-                    <div className={`border-b border-[#243556] bg-[#1e2e4d] ${isCollapsed ? "p-3 flex justify-center" : "p-4"}`}>
+                    <div
+                        className={`border-b border-[#243556] bg-[#1e2e4d] ${isCollapsed ? "p-3 flex justify-center" : "p-4"}`}
+                    >
                         <div
-                            onClick={() => !isCollapsed && setProfileDropdownOpen(!profileDropdownOpen)}
+                            onClick={() =>
+                                !isCollapsed &&
+                                setProfileDropdownOpen(!profileDropdownOpen)
+                            }
                             className={`flex items-center gap-3 group ${isCollapsed ? "justify-center" : "cursor-pointer"}`}
-                            title={isCollapsed ? `${user?.name} (${isPending ? "Applicant" : "Enrolled"})` : undefined}
+                            title={
+                                isCollapsed
+                                    ? `${user?.name} (${isPending ? "Applicant" : "Enrolled"})`
+                                    : undefined
+                            }
                         >
                             <div className="relative shrink-0">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center font-bold text-white shadow-md ring-2 ring-white/10 text-sm overflow-hidden">
                                     {user?.avatar_path ? (
-                                        <img src={user.avatar_path} alt={user?.name} className="w-full h-full object-cover" />
+                                        <img
+                                            src={user.avatar_path}
+                                            alt={user?.name}
+                                            className="w-full h-full object-cover"
+                                        />
                                     ) : (
-                                        <span>{user?.name?.charAt(0) || "S"}</span>
+                                        <span>
+                                            {user?.name?.charAt(0) || "S"}
+                                        </span>
                                     )}
                                 </div>
-                                <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-[#1e2e4d] rounded-full ${isPending ? "bg-amber-400" : "bg-emerald-400"}`}></span>
+                                <span
+                                    className={`absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-[#1e2e4d] rounded-full ${isPending ? "bg-amber-400" : "bg-emerald-400"}`}
+                                ></span>
                             </div>
 
                             {!isCollapsed && (
@@ -256,10 +285,16 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                                         {user?.name || "Student Name"}
                                     </p>
                                     <div className="flex items-center gap-1 mt-0.5">
-                                        <span className={`text-[11px] font-medium truncate ${isPending ? "text-amber-300" : "text-slate-300"}`}>
-                                            {isPending ? "Applicant • Pending Review" : "Enrolled Student"}
+                                        <span
+                                            className={`text-[11px] font-medium truncate ${isPending ? "text-amber-300" : "text-slate-300"}`}
+                                        >
+                                            {isPending
+                                                ? "Applicant • Pending Review"
+                                                : "Enrolled Student"}
                                         </span>
-                                        <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${profileDropdownOpen ? "rotate-180" : ""}`} />
+                                        <ChevronDown
+                                            className={`w-3 h-3 text-slate-400 transition-transform ${profileDropdownOpen ? "rotate-180" : ""}`}
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -268,8 +303,12 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                         {/* LRN pill inside profile */}
                         {!isCollapsed && (
                             <div className="mt-2.5 px-2.5 py-1.5 rounded-md bg-[#16223b] border border-[#2a3c61] flex items-center justify-between text-[10px]">
-                                <span className="text-slate-400 font-medium">LRN:</span>
-                                <span className="font-mono font-bold text-emerald-400">{user?.lrn || "None / Foreign"}</span>
+                                <span className="text-slate-400 font-medium">
+                                    LRN:
+                                </span>
+                                <span className="font-mono font-bold text-emerald-400">
+                                    {user?.lrn || "None / Foreign"}
+                                </span>
                             </div>
                         )}
 
@@ -277,8 +316,12 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                         {!isCollapsed && profileDropdownOpen && (
                             <div className="mt-3 pt-2.5 border-t border-[#2a3c61] space-y-2 text-xs animate-in fade-in duration-150">
                                 <div className="px-2 text-slate-300 text-[11px]">
-                                    <span className="text-slate-400">Email: </span>
-                                    <span className="font-mono text-emerald-300">{user?.email}</span>
+                                    <span className="text-slate-400">
+                                        Email:{" "}
+                                    </span>
+                                    <span className="font-mono text-emerald-300">
+                                        {user?.email}
+                                    </span>
                                 </div>
                                 <button
                                     onClick={handleLogout}
@@ -310,14 +353,24 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                                         return (
                                             <div
                                                 key={item.name}
-                                                title={isCollapsed ? `${item.name} (Locked)` : item.lockedReason}
+                                                title={
+                                                    isCollapsed
+                                                        ? `${item.name} (Locked)`
+                                                        : item.lockedReason
+                                                }
                                                 className={`flex items-center rounded-lg text-xs font-semibold transition-all opacity-40 cursor-not-allowed select-none ${
-                                                    isCollapsed ? "justify-center p-3" : "justify-between px-3.5 py-2.5"
+                                                    isCollapsed
+                                                        ? "justify-center p-3"
+                                                        : "justify-between px-3.5 py-2.5"
                                                 } text-slate-400 bg-slate-900/20`}
                                             >
                                                 <div className="flex items-center gap-3 min-w-0">
                                                     <item.icon className="w-4 h-4 shrink-0 text-slate-500" />
-                                                    {!isCollapsed && <span className="truncate">{item.name}</span>}
+                                                    {!isCollapsed && (
+                                                        <span className="truncate">
+                                                            {item.name}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 {!isCollapsed && (
                                                     <Lock className="w-3.5 h-3.5 text-amber-400/80 shrink-0" />
@@ -330,9 +383,15 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                                         <Link
                                             key={item.name}
                                             href={item.href}
-                                            title={isCollapsed ? item.name : undefined}
+                                            title={
+                                                isCollapsed
+                                                    ? item.name
+                                                    : undefined
+                                            }
                                             className={`flex items-center rounded-lg text-xs font-semibold transition-all group ${
-                                                isCollapsed ? "justify-center p-3" : "justify-between px-3.5 py-2.5"
+                                                isCollapsed
+                                                    ? "justify-center p-3"
+                                                    : "justify-between px-3.5 py-2.5"
                                             } ${
                                                 isActive
                                                     ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30 font-bold"
@@ -347,7 +406,11 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                                                             : "text-slate-400 group-hover:text-emerald-400"
                                                     } transition-colors`}
                                                 />
-                                                {!isCollapsed && <span className="truncate">{item.name}</span>}
+                                                {!isCollapsed && (
+                                                    <span className="truncate">
+                                                        {item.name}
+                                                    </span>
+                                                )}
                                             </div>
                                             {!isCollapsed && !isActive && (
                                                 <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-300 group-hover:translate-x-0.5 transition-transform shrink-0" />
@@ -361,39 +424,58 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                 </div>
 
                 {/* 🏛️ Official Institutional & System Footer */}
-                <div className={`border-t border-[#243556] bg-[#16223b] ${isCollapsed ? "p-2.5 text-center" : "px-4 py-3"}`}>
+                <div
+                    className={`border-t border-[#243556] bg-[#16223b] ${isCollapsed ? "p-2.5 text-center" : "px-4 py-3"}`}
+                >
                     {!isCollapsed ? (
                         <div className="space-y-0.5">
-                            <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
-                                <span className="truncate">Bulusan NHS</span>
+                            <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 gap-2">
+                                <span className="truncate">{school.short_name}</span>
                                 <span className="font-mono text-emerald-400 text-[10px] bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.2 rounded shrink-0">
-                                    ID: 302196
+                                    ID: {school.school_id}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between text-[10px] text-slate-400">
+                            <div className="flex items-center justify-between text-[10px] text-slate-400 gap-2">
                                 <span>v2.4.0</span>
-                                <span className="truncate">DepEd Region V SDO</span>
+                                <span className="truncate">
+                                    {school.region}
+                                </span>
                             </div>
                         </div>
                     ) : (
-                        <div className="text-[10px] font-mono text-emerald-400 font-bold" title="Bulusan NHS • ID: 302196 • v2.4.0 DepEd Region V SDO">
-                            302196
+                        <div
+                            className="text-[10px] font-mono text-emerald-400 font-bold"
+                            title={`${school.short_name} • ID: ${school.school_id} • v2.4.0 ${school.region}`}
+                        >
+                            {school.school_id}
                         </div>
                     )}
                 </div>
             </aside>
 
-            {/* 📱 MOBILE TOP HEADER (Clean BNHS Emerald/Forest Green Theme) */}
-            <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#061e17] via-[#0b3d2e] to-[#08291f] text-white px-4 py-2.5 shadow-md flex items-center justify-between border-b border-emerald-800/60 print:hidden">
+            {/* 📱 MOBILE TOP HEADER (Seamless Terno with BNHS Emerald Hero Banners) */}
+            <header className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white px-4 flex items-center justify-between border-b border-white/10 print:hidden">
                 {/* Brand Logo */}
-                <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-xs text-xs ring-2 ring-emerald-300/40">
-                        B
-                    </div>
-                    <div>
-                        <h1 className="text-xs font-black tracking-wider uppercase text-white">Bulusan NHS</h1>
-                        <p className="text-[10px] text-emerald-300 font-semibold">
-                            {isPending ? "OPAS Pre-Admission" : "Student Portal"}
+                <div className="flex items-center gap-2.5 min-w-0">
+                    {school.logo_url ? (
+                        <img
+                            src={school.logo_url}
+                            alt={school.short_name}
+                            className="w-8 h-8 object-contain shrink-0 drop-shadow-sm"
+                        />
+                    ) : (
+                        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-xs text-xs ring-2 ring-emerald-300/40 shrink-0">
+                            {school.initial}
+                        </div>
+                    )}
+                    <div className="min-w-0">
+                        <h1 className="text-xs font-black tracking-wider uppercase text-white truncate">
+                            {school.short_name}
+                        </h1>
+                        <p className="text-[10px] text-emerald-300 font-semibold truncate">
+                            {isPending
+                                ? "OPAS Pre-Admission"
+                                : "Student Portal"}
                         </p>
                     </div>
                 </div>
@@ -421,15 +503,24 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                         <button
                             onClick={toggleDesktopSidebar}
                             className="hidden lg:flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition cursor-pointer"
-                            title={isCollapsed ? "Expand Sidebar (Wider)" : "Compress Sidebar (Icons Only)"}
+                            title={
+                                isCollapsed
+                                    ? "Expand Sidebar (Wider)"
+                                    : "Compress Sidebar (Icons Only)"
+                            }
                         >
                             <Menu className="w-5 h-5" />
                         </button>
 
                         <div>
-                            <h2 className="text-base font-bold text-slate-800">{title}</h2>
+                            <h2 className="text-base font-bold text-slate-800">
+                                {title}
+                            </h2>
                             <p className="text-[11px] text-slate-400">
-                                Bulusan National High School • {isPending ? "Pre-Admission Portal" : "Student Portal"}
+                                {school.school_name} •{" "}
+                                {isPending
+                                    ? "Pre-Admission Portal"
+                                    : "Student Portal"}
                             </p>
                         </div>
                     </div>
@@ -437,13 +528,19 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                     <div className="flex items-center gap-3">
                         <NotificationBell isDark={false} />
 
-                        <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold shadow-2xs border ${
-                            isPending 
-                                ? "bg-amber-50 border-amber-200 text-amber-800" 
-                                : "bg-emerald-50 border-emerald-200 text-emerald-700"
-                        }`}>
+                        <div
+                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold shadow-2xs border ${
+                                isPending
+                                    ? "bg-amber-50 border-amber-200 text-amber-800"
+                                    : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                            }`}
+                        >
                             <Shield className="w-3.5 h-3.5" />
-                            <span>{isPending ? "Pre-Admission (Pending Review)" : getActiveYearLabel()}</span>
+                            <span>
+                                {isPending
+                                    ? "Pre-Admission (Pending Review)"
+                                    : getActiveYearLabel()}
+                            </span>
                         </div>
                     </div>
                 </header>
@@ -492,7 +589,9 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                                 </div>
                                 <span
                                     className={`text-[9px] mt-0.5 font-bold tracking-tight leading-none ${
-                                        isActive ? "text-emerald-700" : "text-slate-500"
+                                        isActive
+                                            ? "text-emerald-700"
+                                            : "text-slate-500"
                                     }`}
                                 >
                                     {item.name}
@@ -511,8 +610,12 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                                     : "text-slate-400 hover:text-slate-600 font-medium"
                             }`}
                         >
-                            <item.icon className={`w-4.5 h-4.5 ${isActive ? "stroke-[2.5]" : "stroke-2"}`} />
-                            <span className="text-[9px] mt-0.5 leading-none">{item.name}</span>
+                            <item.icon
+                                className={`w-4.5 h-4.5 ${isActive ? "stroke-[2.5]" : "stroke-2"}`}
+                            />
+                            <span className="text-[9px] mt-0.5 leading-none">
+                                {item.name}
+                            </span>
                         </Link>
                     );
                 })}

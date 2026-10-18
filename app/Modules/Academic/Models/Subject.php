@@ -30,7 +30,8 @@ class Subject extends Model
 
     public function grades(): HasMany
     {
-        return $this->hasMany(Grade::class);
+       return $this->hasMany(Grade::class, 'subject_id', 'id');
+
     }
 
     //ahh ang bawat section ay pwd at maaring gamitin ang subject na iyun, hnd lng sa iisa?

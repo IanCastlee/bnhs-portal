@@ -48,7 +48,7 @@ class RegistrarEnrollmentController extends Controller
         ]);
 
         // Active Academic Year Scoping with Session Persistence
-        $activeYear = AcademicYear::where('is_active', true)->first();
+        $activeYear = AcademicYear::getCachedActive();
         if ($request->has('academic_year_id')) {
             $academicYearId = $request->query('academic_year_id');
             session(['registrar_academic_year_id' => $academicYearId]);
@@ -86,6 +86,32 @@ class RegistrarEnrollmentController extends Controller
             });
         }
 
+        // Helper condition for Approved enrollments with "to follow" / conditional / incomplete requirements
+        $applyApprovedIncompleteCondition = function ($q) {
+            $q->where(function ($sub) {
+                $sub->where('is_complete', false)
+                    ->orWhere('remarks', 'like', '%to follow%')
+                    ->orWhere('remarks', 'like', '%Conditionally Approved%')
+                    ->orWhere('remarks', 'like', '%pending%')
+                    ->orWhere('remarks', 'like', '%incomplete%')
+                    ->orWhere('remarks', 'like', '%kulang%');
+            });
+        };
+
+        $applyApprovedCompleteCondition = function ($q) {
+            $q->where('is_complete', true)
+              ->where(function ($sub) {
+                  $sub->whereNull('remarks')
+                      ->orWhere(function ($r) {
+                          $r->where('remarks', 'not like', '%to follow%')
+                            ->where('remarks', 'not like', '%Conditionally Approved%')
+                            ->where('remarks', 'not like', '%pending%')
+                            ->where('remarks', 'not like', '%incomplete%')
+                            ->where('remarks', 'not like', '%kulang%');
+                      });
+              });
+        };
+
         //  Status Tabs Filtering & Pure Indexed Ordering (Zero CASE WHEN filesort overhead)
         if ($status === 'PENDING_COMPLETE') {
             $query->where('status', EnrollmentStatus::PENDING_REVIEW->value)
@@ -101,6 +127,16 @@ class RegistrarEnrollmentController extends Controller
             $query->where('status', EnrollmentStatus::PENDING_REVIEW->value)
                   ->orderBy('is_complete', 'desc')
                   ->orderBy('updated_at', 'desc')
+                  ->orderBy('id', 'desc');
+        } elseif ($status === 'APPROVED_COMPLETE') {
+            $query->where('status', EnrollmentStatus::APPROVED->value);
+            $applyApprovedCompleteCondition($query);
+            $query->orderBy('reviewed_at', 'desc')
+                  ->orderBy('id', 'desc');
+        } elseif ($status === 'APPROVED_INCOMPLETE') {
+            $query->where('status', EnrollmentStatus::APPROVED->value);
+            $applyApprovedIncompleteCondition($query);
+            $query->orderBy('reviewed_at', 'desc')
                   ->orderBy('id', 'desc');
         } elseif ($status === 'APPROVED') {
             $query->where('status', EnrollmentStatus::APPROVED->value)
@@ -124,18 +160,6 @@ class RegistrarEnrollmentController extends Controller
             $enrollments = $query->paginate(15)->withQueryString();
         }
 
-        // Cached lookup data (1-hour TTL)
-        $sections = Cache::remember('registrar_active_sections', 3600, function () {
-            return Section::with(['gradeLevel:id,level,name', 'adviser:id,name,email'])
-                ->orderBy('name')
-                ->get()
-                ->toArray();
-        });
-
-        $gradeLevels = Cache::remember('public_grade_levels', 3600, function () {
-            return GradeLevel::orderBy('level')->get()->toArray();
-        });
-
         // 🎯 Accurate Scoped Queue Metrics for the Registrar's partition & active School Year
         $countBaseQuery = Enrollment::query();
         if ($academicYearId) {
@@ -153,28 +177,41 @@ class RegistrarEnrollmentController extends Controller
             SUM(CASE WHEN status = ? AND is_complete = 1 THEN 1 ELSE 0 END) as pending_complete,
             SUM(CASE WHEN status = ? AND is_complete = 0 THEN 1 ELSE 0 END) as pending_incomplete,
             SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as approved,
+            SUM(CASE WHEN status = ? AND (
+                is_complete = 0
+                OR LOWER(COALESCE(remarks, '')) LIKE '%to follow%'
+                OR LOWER(COALESCE(remarks, '')) LIKE '%conditionally approved%'
+                OR LOWER(COALESCE(remarks, '')) LIKE '%pending%'
+                OR LOWER(COALESCE(remarks, '')) LIKE '%incomplete%'
+                OR LOWER(COALESCE(remarks, '')) LIKE '%kulang%'
+            ) THEN 1 ELSE 0 END) as approved_incomplete,
             SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as rejected
         ", [
             EnrollmentStatus::PENDING_REVIEW->value,
             EnrollmentStatus::PENDING_REVIEW->value,
             EnrollmentStatus::PENDING_REVIEW->value,
             EnrollmentStatus::APPROVED->value,
+            EnrollmentStatus::APPROVED->value,
             EnrollmentStatus::REJECTED->value,
         ])->first();
 
+        $approvedTotal = (int) ($metrics->approved ?? 0);
+        $approvedIncomplete = (int) ($metrics->approved_incomplete ?? 0);
+        $approvedComplete = max(0, $approvedTotal - $approvedIncomplete);
+
         $counts = [
-            'pending'            => (int) ($metrics->pending ?? 0),
-            'pending_complete'   => (int) ($metrics->pending_complete ?? 0),
-            'pending_incomplete' => (int) ($metrics->pending_incomplete ?? 0),
-            'approved'           => (int) ($metrics->approved ?? 0),
-            'rejected'           => (int) ($metrics->rejected ?? 0),
-            'total'              => (int) ($metrics->total ?? 0),
+            'pending'             => (int) ($metrics->pending ?? 0),
+            'pending_complete'    => (int) ($metrics->pending_complete ?? 0),
+            'pending_incomplete'  => (int) ($metrics->pending_incomplete ?? 0),
+            'approved'            => $approvedTotal,
+            'approved_complete'   => $approvedComplete,
+            'approved_incomplete' => $approvedIncomplete,
+            'rejected'            => (int) ($metrics->rejected ?? 0),
+            'total'               => (int) ($metrics->total ?? 0),
         ];
 
         return Inertia::render('Registrar/Enrollments', [
             'enrollments' => $enrollments,
-            'sections' => $sections,
-            'gradeLevels' => $gradeLevels,
             'filters' => [
                 'status' => $status,
                 'search' => $search,
@@ -223,10 +260,8 @@ class RegistrarEnrollmentController extends Controller
             // Lock row for update to prevent concurrent double-approval
             $lockedEnrollment = Enrollment::where('id', $enrollment->id)->lockForUpdate()->firstOrFail();
 
-            //  Double-Approval Guard
             if ($lockedEnrollment->status === EnrollmentStatus::APPROVED) {
                 $alreadyApproved = true;
-                return;
             }
 
             // 🛡️ DepEd Compliance Guard: Block approval if household info is missing
@@ -242,7 +277,7 @@ class RegistrarEnrollmentController extends Controller
             $updateData = [
                 'status'      => EnrollmentStatus::APPROVED,
                 'reviewed_by' => $reviewerId,
-                'reviewed_at' => now(),
+                'reviewed_at' => $alreadyApproved ? ($lockedEnrollment->reviewed_at ?? now()) : now(),
                 'remarks'     => $validated['remarks'] ?? 'Application approved and verified by Registrar.',
             ];
 
@@ -312,7 +347,8 @@ class RegistrarEnrollmentController extends Controller
         });
 
         if ($alreadyApproved) {
-            return back()->with('info', "Application for {$enrollment->student?->name} was already approved.");
+            Cache::forget("student_enrollment_{$enrollment->student_id}");
+            return back()->with('success', "Updated evaluation and remarks for {$enrollment->student?->name}.");
         }
 
         // Fetch fresh model and relations once for background job and student notification

@@ -18,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // 🌐 1. GLOBAL RATE LIMITER (600 req/min per IP - Accommodates 40+ Students in Computer Labs)
+        //  1. GLOBAL RATE LIMITER (600 req/min per IP - Accommodates 40+ Students in Computer Labs)
         RateLimiter::for('global', function (Request $request) {
             return Limit::perMinute(600)
                 ->by($request->user()?->id ?: $request->ip())
@@ -36,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
                 });
         });
 
-        // 🛑 2. STRICT LOGIN RATE LIMITER (5 attempts/min per email, 100/min per shared IP)
+        //  2. STRICT LOGIN RATE LIMITER (5 attempts/min per email, 100/min per shared IP)
         RateLimiter::for('login', function (Request $request) {
             $email = Str::lower((string) $request->input('email'));
 

@@ -1,7 +1,16 @@
 import React from "react";
 import Button from "@/Components/Atoms/Common/Button";
 import Input from "@/Components/Atoms/Common/Input";
-import { Check, CheckCircle2, ArrowRight, ArrowLeft, ShieldCheck, School, Info, Lock } from "lucide-react";
+import {
+    Check,
+    CheckCircle2,
+    ArrowRight,
+    ArrowLeft,
+    ShieldCheck,
+    School,
+    Info,
+    Lock,
+} from "lucide-react";
 
 export default function StepHouseholdInfo({
     householdData,
@@ -38,12 +47,15 @@ export default function StepHouseholdInfo({
                             {isStep2Complete && (
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] sm:text-xs font-bold shrink-0">
                                     <CheckCircle2 className="w-3.5 h-3.5" />
-                                    {isApproved ? "Verified & Locked ✓" : "Saved ✓"}
+                                    {isApproved
+                                        ? "Verified & Locked ✓"
+                                        : "Saved ✓"}
                                 </span>
                             )}
                         </div>
                         <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                            DepEd Basic Education Enrollment Form (Annex A) Requirements
+                            DepEd Basic Education Enrollment Form (Annex A)
+                            Requirements
                         </p>
                     </div>
                 </div>
@@ -54,9 +66,15 @@ export default function StepHouseholdInfo({
                 <div className="p-3.5 rounded-xl bg-slate-100/90 border border-slate-200 text-xs text-slate-800 flex items-start gap-2.5">
                     <Lock className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                     <div>
-                        <span className="font-bold text-slate-900">Opisyal nang Naka-enroll (Record Locked):</span>
+                        <span className="font-bold text-slate-900">
+                            Opisyal nang Naka-enroll (Record Locked):
+                        </span>
                         <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
-                            Naka-lock na ang iyong impormasyon para sa kasalukuyang School Year dahil opisyal nang na-verify at na-approve ng Registrar. Para sa anumang opisyal na pagbabago, mangyaring makipag-ugnayan sa Registrar's Office.
+                            Naka-lock na ang iyong impormasyon para sa
+                            kasalukuyang School Year dahil opisyal nang
+                            na-verify at na-approve ng Registrar. Para sa
+                            anumang opisyal na pagbabago, mangyaring
+                            makipag-ugnayan sa Registrar's Office.
                         </p>
                     </div>
                 </div>
@@ -64,9 +82,13 @@ export default function StepHouseholdInfo({
                 <div className="p-3.5 rounded-xl bg-emerald-50/90 border border-emerald-200 text-xs text-emerald-950 flex items-start gap-2.5">
                     <Info className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                     <div>
-                        <span className="font-bold">Continuing Bulusan NHS Student:</span>
+                        <span className="font-bold">
+                            Continuing Bulusan NHS Student:
+                        </span>
                         <p className="text-[11px] text-emerald-800 mt-0.5 leading-relaxed">
-                            Awtomatikong naka-prefill ang iyong impormasyon at verified GWA mula sa iyong nakaraang record. I-edit lamang ang contact o address kung may nagbago.
+                            Awtomatikong naka-prefill ang iyong impormasyon at
+                            verified GWA mula sa iyong nakaraang record. I-edit
+                            lamang ang contact o address kung may nagbago.
                         </p>
                     </div>
                 </div>
@@ -91,7 +113,7 @@ export default function StepHouseholdInfo({
                             }
                             placeholder="Hal. Elena Hilda Co"
                             required
-                            className={`h-11 text-xs sm:text-sm font-medium ${isApproved ? 'bg-slate-100 text-slate-700 cursor-not-allowed' : ''}`}
+                            className={`h-11 text-sm  font-medium ${isApproved ? "bg-slate-100 text-slate-700 cursor-not-allowed" : ""}`}
                         />
                     </div>
 
@@ -111,7 +133,7 @@ export default function StepHouseholdInfo({
                             }
                             placeholder="Hal. 0918-765-4321"
                             required
-                            className={`h-11 text-xs sm:text-sm font-mono font-medium ${isApproved ? 'bg-slate-100 text-slate-700 cursor-not-allowed' : ''}`}
+                            className={`h-11 text-sm  font-mono font-medium ${isApproved ? "bg-slate-100 text-slate-700 cursor-not-allowed" : ""}`}
                         />
                     </div>
                 </div>
@@ -133,10 +155,10 @@ export default function StepHouseholdInfo({
                         placeholder="House No., Street/Purok, Barangay, Bayan, Lalawigan"
                         required
                         rows={2}
-                        className={`w-full rounded-xl border border-slate-300 p-3 text-xs sm:text-sm font-medium ${
+                        className={`w-full rounded-xl border border-slate-300 p-3 text-sm  font-medium ${
                             isApproved
-                                ? 'bg-slate-100 text-slate-700 cursor-not-allowed border-slate-200'
-                                : 'focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600'
+                                ? "bg-slate-100 text-slate-700 cursor-not-allowed border-slate-200"
+                                : "focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                         }`}
                     />
                 </div>
@@ -162,8 +184,10 @@ export default function StepHouseholdInfo({
                                 })
                             }
                             placeholder="Bulusan National High School"
-                            className={`h-11 text-xs font-medium ${
-                                (isOldStudent || isApproved) ? "bg-slate-100 text-slate-700 border-slate-200 cursor-not-allowed" : ""
+                            className={`h-11 text-sm font-medium ${
+                                isOldStudent || isApproved
+                                    ? "bg-slate-100 text-slate-700 border-slate-200 cursor-not-allowed"
+                                    : ""
                             }`}
                         />
                     </div>
@@ -173,7 +197,8 @@ export default function StepHouseholdInfo({
                             <span>Last General Average (GWA)</span>
                             {(isOldStudent || isApproved) && (
                                 <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
-                                    <ShieldCheck className="w-3 h-3 text-emerald-600" /> DepEd Verified
+                                    <ShieldCheck className="w-3 h-3 text-emerald-600" />{" "}
+                                    DepEd Verified
                                 </span>
                             )}
                         </label>
@@ -190,8 +215,10 @@ export default function StepHouseholdInfo({
                                 })
                             }
                             placeholder="88.75"
-                            className={`h-11 text-xs font-mono font-black ${
-                                (isOldStudent || isApproved) ? "bg-emerald-50 text-emerald-950 border-emerald-200 cursor-not-allowed" : ""
+                            className={`h-11 text-sm font-mono font-black ${
+                                isOldStudent || isApproved
+                                    ? "bg-emerald-50 text-emerald-950 border-emerald-200 cursor-not-allowed"
+                                    : ""
                             }`}
                         />
                     </div>
@@ -211,27 +238,27 @@ export default function StepHouseholdInfo({
                                 })
                             }
                             placeholder="056201001-1234567"
-                            className={`h-11 text-xs font-mono ${isApproved ? 'bg-slate-100 text-slate-700 cursor-not-allowed' : ''}`}
+                            className={`h-11 text-sm font-mono ${isApproved ? "bg-slate-100 text-slate-700 cursor-not-allowed" : ""}`}
                         />
                     </div>
                 </div>
 
                 {/* Action Buttons: Responsive Back + Save & Next using reusable Button */}
-                <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                <div className="flex items-stretch sm:items-center gap-3 pt-4 border-t border-slate-100">
                     <Button
                         type="button"
                         variant="outline"
                         size="md"
                         onClick={onBack}
-                        className="w-full sm:w-auto"
+                        className="w-auto shrink-0 px-5 py-3.5"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-1.5" />
-                        <span>Back: Profile</span>
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Back</span>
                     </Button>
 
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="flex flex-1 items-center gap-2">
                         {saveHouseholdSuccess && (
-                            <span className="text-xs font-bold text-emerald-700 hidden sm:inline-flex items-center gap-1">
+                            <span className="text-xs font-bold text-emerald-700 hidden sm:inline-flex items-center gap-1 shrink-0">
                                 <CheckCircle2 className="w-3.5 h-3.5" /> Saved!
                             </span>
                         )}
@@ -242,9 +269,11 @@ export default function StepHouseholdInfo({
                             size="md"
                             loading={isSavingHousehold}
                             disabled={isSavingHousehold}
-                            className="w-full sm:w-auto"
+                            className="flex-1 w-full py-3.5"
                         >
-                            <span>{isApproved ? "Next: Documents" : "Save & Next: Documents"}</span>
+                            <span>
+                                {isApproved ? "Next: Documents" : "Save & Next"}
+                            </span>
                             <ArrowRight className="w-4 h-4 ml-1.5" />
                         </Button>
                     </div>

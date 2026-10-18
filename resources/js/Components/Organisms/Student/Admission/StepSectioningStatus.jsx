@@ -26,7 +26,7 @@ export default function StepSectioningStatus({
     const remarks = enrollment?.remarks;
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-6 shadow-xs space-y-5 animate-fadeIn">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-5 animate-fadeIn">
             {/* Step Header */}
             <div className="pb-3 border-b border-slate-100">
                 <div className="flex items-start gap-3">
@@ -35,8 +35,8 @@ export default function StepSectioningStatus({
                             isApproved
                                 ? "bg-emerald-600"
                                 : isRejected
-                                ? "bg-rose-600"
-                                : "bg-amber-500"
+                                  ? "bg-rose-600"
+                                  : "bg-amber-500"
                         }`}
                     >
                         {isApproved ? (
@@ -73,8 +73,8 @@ export default function StepSectioningStatus({
                             {isApproved
                                 ? "Official section placement and adviser assignment"
                                 : isRejected
-                                ? "Registrar feedback and action required"
-                                : "Registrar verification and queue status"}
+                                  ? "Registrar feedback and action required"
+                                  : "Registrar verification and queue status"}
                         </p>
                     </div>
                 </div>
@@ -90,10 +90,13 @@ export default function StepSectioningStatus({
                         </div>
                         <div className="flex-1 min-w-0">
                             <h4 className="font-black text-emerald-950 text-sm sm:text-base leading-snug">
-                                Mabuhay! Opisyal ka nang Enrolled sa Bulusan NHS!
+                                Mabuhay! Opisyal ka nang Enrolled sa Bulusan
+                                NHS!
                             </h4>
                             <p className="text-xs text-emerald-800 mt-1 leading-relaxed">
-                                Na-verify na ng Registrar ang iyong Basic Education Enrollment Record at opisyal na naitalaga sa iyong seksyon.
+                                Na-verify na ng Registrar ang iyong Basic
+                                Education Enrollment Record at opisyal na
+                                naitalaga sa iyong seksyon.
                             </p>
                         </div>
                     </div>
@@ -104,9 +107,9 @@ export default function StepSectioningStatus({
                                 Assigned Section
                             </span>
                             <span className="font-black text-slate-900 text-base block mt-0.5">
-                                {enrollment?.section?.name 
-                                    ? `${enrollment?.grade_level?.name ? enrollment.grade_level.name + ' - ' : ''}${enrollment.section.name}`
-                                    : `${enrollment?.grade_level?.name || 'Grade 8'} (To Be Announced / In Progress)`}
+                                {enrollment?.section?.name
+                                    ? `${enrollment?.grade_level?.name ? enrollment.grade_level.name + " - " : ""}${enrollment.section.name}`
+                                    : `${enrollment?.grade_level?.name || "Grade 8"} (To Be Announced / In Progress)`}
                             </span>
                         </div>
                         <div className="p-3.5 rounded-xl bg-white border border-emerald-200/80 shadow-2xs">
@@ -114,7 +117,8 @@ export default function StepSectioningStatus({
                                 Section Adviser
                             </span>
                             <span className="font-bold text-slate-900 text-sm block mt-0.5">
-                                {enrollment?.section?.adviser?.name || "To Be Assigned by Registrar"}
+                                {enrollment?.section?.adviser?.name ||
+                                    "To Be Assigned by Registrar"}
                             </span>
                         </div>
                     </div>
@@ -141,7 +145,10 @@ export default function StepSectioningStatus({
                             </h4>
 
                             <p className="text-xs text-rose-900 leading-relaxed">
-                                May nakitang kakulangan o kinakailangang pagwawasto sa iyong isinumiteng impormasyon o credentials. Pakiusap suriin ang dahilan sa ibaba:
+                                May nakitang kakulangan o kinakailangang
+                                pagwawasto sa iyong isinumiteng impormasyon o
+                                credentials. Pakiusap suriin ang dahilan sa
+                                ibaba:
                             </p>
 
                             <div className="p-3.5 rounded-xl bg-white border border-rose-200 shadow-2xs">
@@ -149,7 +156,10 @@ export default function StepSectioningStatus({
                                     Dahilan mula sa Registrar Office:
                                 </span>
                                 <p className="text-xs font-bold text-rose-950 mt-1 italic">
-                                    &ldquo;{remarks || 'Pakisuri at kumpletuhin ang mga kulang na detalye sa iyong application.'}&rdquo;
+                                    &ldquo;
+                                    {remarks ||
+                                        "Pakisuri at kumpletuhin ang mga kulang na detalye sa iyong application."}
+                                    &rdquo;
                                 </p>
                             </div>
                         </div>
@@ -157,7 +167,9 @@ export default function StepSectioningStatus({
 
                     <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-rose-200/70">
                         <p className="text-xs text-rose-800">
-                            I-click ang button upang iwasto o kumpletuhin ang iyong Household Information (Parent/Guardian at Address).
+                            I-click ang button upang iwasto o kumpletuhin ang
+                            iyong Household Information (Parent/Guardian at
+                            Address).
                         </p>
                         <Button
                             type="button"
@@ -184,30 +196,54 @@ export default function StepSectioningStatus({
                                     Application Under Evaluation
                                 </span>
                                 <span className="text-xs font-mono font-bold text-slate-700 bg-white/80 px-2 py-0.5 rounded border border-amber-200">
-                                    Queue Ticket: {trackingNo} (Posisyon #{queuePosition || 1})
+                                    Queue Ticket: {trackingNo} (Posisyon #
+                                    {queuePosition || 1})
                                 </span>
                             </div>
 
                             <h4 className="text-sm sm:text-base font-black text-slate-900 pt-1 leading-snug">
-                                Kasalukuyang Sinusuri ng School Registrar ang Iyong Aplikasyon
+                                Kasalukuyang Sinusuri ng School Registrar ang
+                                Iyong Aplikasyon
                             </h4>
 
                             <p className="text-xs text-slate-600 leading-relaxed">
-                                Natanggap na ng system ang iyong Basic Education Enrollment Form (BEEF). Kasalukuyan itong bine-beripika ng Registrar Office para sa pagsusuri at pagtatalaga ng iyong <strong>Opisyal na Seksyon</strong> at <strong>Section Adviser</strong>.
+                                Natanggap na ng system ang iyong Basic Education
+                                Enrollment Form (BEEF). Kasalukuyan itong
+                                bine-beripika ng Registrar Office para sa
+                                pagsusuri at pagtatalaga ng iyong{" "}
+                                <strong>Opisyal na Seksyon</strong> at{" "}
+                                <strong>Section Adviser</strong>.
                             </p>
 
                             <div className="pt-2.5 text-xs space-y-1.5 border-t border-amber-200/70 mt-2.5">
                                 <p className="flex items-center gap-2 text-emerald-900 font-bold text-[11px]">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                                    <span>Nai-submit na online ang iyong Basic Education Enrollment Form (Profile at Household Information).</span>
+                                    <span>
+                                        Nai-submit na online ang iyong Basic
+                                        Education Enrollment Form (Profile at
+                                        Household Information).
+                                    </span>
                                 </p>
                                 <p className="flex items-center gap-2 text-slate-700 font-medium text-[11px]">
                                     <FileText className="w-4 h-4 text-emerald-700 shrink-0" />
-                                    <span>Ihanda ang physical requirements (Form 138/SF9, PSA copy, Good Moral, 2x2 ID picture) para sa pagsusuri sa Registrar Office.</span>
+                                    <span>
+                                        Ihanda ang physical requirements (Form
+                                        138/SF9, PSA copy, Good Moral, 2x2 ID
+                                        picture) para sa pagsusuri sa Registrar
+                                        Office.
+                                    </span>
                                 </p>
                                 <p className="flex items-center gap-2 text-slate-600 text-[11px]">
                                     <Info className="w-4 h-4 text-amber-700 shrink-0" />
-                                    <span>Awtomatikong mag-u-unlock ang iyong Academic Dashboard at magiging available ang <strong>Official BEEF Slip (Annex A)</strong> kapag na-aprubahan na ng Registrar.</span>
+                                    <span>
+                                        Awtomatikong mag-u-unlock ang iyong
+                                        Academic Dashboard at magiging available
+                                        ang{" "}
+                                        <strong>
+                                            Official BEEF Slip (Annex A)
+                                        </strong>{" "}
+                                        kapag na-aprubahan na ng Registrar.
+                                    </span>
                                 </p>
                             </div>
                         </div>
@@ -222,7 +258,7 @@ export default function StepSectioningStatus({
                     variant="outline"
                     size="md"
                     onClick={onBack}
-                    className="w-full sm:w-auto"
+                    className="w-full py-3.5 sm:w-auto"
                 >
                     <ArrowLeft className="w-4 h-4 mr-1.5" />
                     <span>Back: Requirements Guide</span>
@@ -243,12 +279,16 @@ export default function StepSectioningStatus({
                 ) : isRejected ? (
                     <div className="flex items-center gap-2 text-xs font-semibold text-rose-600 bg-rose-50 px-4 py-2.5 rounded-xl self-stretch sm:self-auto justify-center border border-rose-200">
                         <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                        <span>Kailangang iwasto ang impormasyon bago ma-enroll</span>
+                        <span>
+                            Kailangang iwasto ang impormasyon bago ma-enroll
+                        </span>
                     </div>
                 ) : (
                     <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 bg-slate-100 px-4 py-2.5 rounded-xl self-stretch sm:self-auto justify-center">
                         <Clock className="w-3.5 h-3.5 text-amber-600" />
-                        <span>BEEF Slip Download unlocks upon Registrar Approval</span>
+                        <span>
+                            BEEF Slip Download unlocks upon Registrar Approval
+                        </span>
                     </div>
                 )}
             </div>

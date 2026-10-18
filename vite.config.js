@@ -18,4 +18,12 @@ export default defineConfig({
             "@": path.resolve(__dirname, "resources/js"),
         },
     },
+    server: {
+        host: "0.0.0.0",
+        origin: "http://192.168.8.185:5173",
+        cors: true,
+        hmr: {
+            host: "192.168.8.185",
+        },
+    },
 });

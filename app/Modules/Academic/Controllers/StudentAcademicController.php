@@ -36,7 +36,7 @@ class StudentAcademicController extends Controller
     public function dashboard(Request $request): Response|RedirectResponse
     {
         $user = Auth::user();
-        $activeYear = AcademicYear::where('is_active', true)->first();
+        $activeYear = AcademicYear::getCachedActive();
 
         // 1. Fetch current active enrollment
         $enrollment = Enrollment::with([
@@ -90,7 +90,7 @@ class StudentAcademicController extends Controller
     public function grades(Request $request): Response|RedirectResponse
     {
         $user = Auth::user();
-        $activeYear = AcademicYear::where('is_active', true)->first();
+        $activeYear = AcademicYear::getCachedActive();
 
         $enrollment = Enrollment::with([
             'section.adviser',
@@ -124,23 +124,24 @@ class StudentAcademicController extends Controller
             ->where('academic_year_id', $enrollment->academic_year_id)
             ->get();
 
-        // DepEd Report Card Formatter
+        // DepEd Report Card Formatter (Only show officially PUBLISHED grades to students)
         $reportCard = $grades->map(function ($g) {
             $isPublished = $g->status === GradeSubmissionStatus::PUBLISHED;
-            
+            $finalGrade = $isPublished && $g->final_grade !== null ? (float) $g->final_grade : null;
+
             return [
                 'id'           => $g->id,
                 'subject_code' => $g->subject?->code ?? 'N/A',
                 'subject_name' => $g->subject?->name ?? 'Subject',
                 'teacher_name' => $g->teacher?->name ?? 'Faculty',
-                'q1'           => $isPublished || $g->q1 !== null ? $g->q1 : null,
-                'q2'           => $isPublished || $g->q2 !== null ? $g->q2 : null,
-                'q3'           => $isPublished || $g->q3 !== null ? $g->q3 : null,
-                'q4'           => $isPublished || $g->q4 !== null ? $g->q4 : null,
-                'final_grade'  => $g->final_grade,
-                'remarks'      => $g->remarks ?? 'PENDING',
-                'descriptor'   => DepEdGradingService::getDescriptor($g->final_grade ? (float) $g->final_grade : null),
-                'status'       => $g->status,
+                'q1'           => $isPublished ? $g->q1 : null,
+                'q2'           => $isPublished ? $g->q2 : null,
+                'q3'           => $isPublished ? $g->q3 : null,
+                'q4'           => $isPublished ? $g->q4 : null,
+                'final_grade'  => $finalGrade,
+                'remarks'      => $isPublished ? ($g->remarks ?? 'PENDING') : 'PENDING',
+                'descriptor'   => DepEdGradingService::getDescriptor($finalGrade),
+                'status'       => $g->status?->value ?? (string) $g->status,
             ];
         });
 
@@ -163,7 +164,7 @@ class StudentAcademicController extends Controller
     public function classes(Request $request): Response|RedirectResponse
     {
         $user = Auth::user();
-        $activeYear = AcademicYear::where('is_active', true)->first();
+        $activeYear = AcademicYear::getCachedActive();
 
         $enrollment = Enrollment::with([
             'section.adviser',

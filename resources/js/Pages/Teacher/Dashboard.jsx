@@ -295,7 +295,7 @@ export default function TeacherDashboard({
                                     advisorySections.map((sec) => (
                                         <div
                                             key={sec.id}
-                                            className="p-3.5 rounded-xl border border-slate-200/70 bg-slate-50/60 flex items-center justify-between hover:bg-slate-100/80 transition-colors"
+                                            className="p-3.5 rounded-xl border border-slate-200/70 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-slate-100/80 transition-colors"
                                         >
                                             <div>
                                                 <h4 className="text-xs font-black text-slate-900">
@@ -305,12 +305,20 @@ export default function TeacherDashboard({
                                                     Enrolled: <strong>{sec.enrollments_count || 0}</strong> students
                                                 </span>
                                             </div>
-                                            <Link href={`/teacher/sections/${sec.id}/roster`}>
-                                                <Button variant="outline" size="sm">
-                                                    <span>View Roster</span>
-                                                    <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                                </Button>
-                                            </Link>
+                                            <div className="flex items-center gap-2">
+                                                <Link href="/teacher/advisory">
+                                                    <Button variant="emerald" size="sm" className="text-xs font-bold">
+                                                        <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
+                                                        <span>Review Grades</span>
+                                                    </Button>
+                                                </Link>
+                                                <Link href={`/teacher/sections/${sec.id}/roster`}>
+                                                    <Button variant="outline" size="sm" className="text-xs">
+                                                        <span>View Roster</span>
+                                                        <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                                    </Button>
+                                                </Link>
+                                            </div>
                                         </div>
                                     ))
                                 ) : (

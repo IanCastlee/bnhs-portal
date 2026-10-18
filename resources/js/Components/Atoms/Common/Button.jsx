@@ -16,20 +16,17 @@ export default function Button({
     const variants = {
         emerald:
             "bg-emerald-700 text-white hover:bg-emerald-800 focus:ring-emerald-600 shadow-sm",
-        bnhs:
-            "bg-[#0f4c3a] text-white hover:bg-[#093528] focus:ring-emerald-600 shadow-sm",
+        bnhs: "bg-[#0f4c3a] text-white hover:bg-[#093528] focus:ring-emerald-600 shadow-sm",
         success:
             "bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm",
         primary:
             "bg-emerald-700 text-white hover:bg-emerald-800 focus:ring-emerald-600 shadow-sm",
         secondary:
             "bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-400",
-        danger:
-            "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500 shadow-sm",
+        danger: "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500 shadow-sm",
         outline:
             "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:ring-emerald-500",
-        ghost:
-            "text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-400",
+        ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-400",
     };
 
     const sizes = {

@@ -29,32 +29,36 @@ export default function StepPhysicalRequirements({
     const requirements = [
         {
             title: "Original Form 138 / SF9 (Report Card)",
-            description: "Final Grade 6 Report Card (for Grade 7) or Latest Report Card with Principal's signature and eligibility for admission.",
+            description:
+                "Final Grade 6 Report Card (for Grade 7) or Latest Report Card with Principal's signature and eligibility for admission.",
             badge: "Mandatory Original",
             color: "emerald",
         },
         {
             title: "PSA Birth Certificate (Photocopy)",
-            description: "Clear PSA-authenticated copy (o NSO birth certificate kung wala pa ang PSA).",
+            description:
+                "Clear PSA-authenticated copy (o NSO birth certificate kung wala pa ang PSA).",
             badge: "Required",
             color: "blue",
         },
         {
             title: "Certificate of Good Moral Character",
-            description: "Issued by the Elementary School Principal or Guidance Counselor.",
+            description:
+                "Issued by the Elementary School Principal or Guidance Counselor.",
             badge: "Required",
             color: "amber",
         },
         {
             title: "2x2 Recent ID Picture (2 Copies)",
-            description: "White background with learner name tag (DepEd standard).",
+            description:
+                "White background with learner name tag (DepEd standard).",
             badge: "Required",
             color: "purple",
         },
     ];
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-6 animate-fadeIn">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-6 shadow-xs space-y-6 animate-fadeIn">
             {/* Step Header */}
             <div className="pb-4 border-b border-slate-100 flex items-start gap-3">
                 <span className="w-8 h-8 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
@@ -69,7 +73,6 @@ export default function StepPhysicalRequirements({
                             Onsite Submission (Hard Copy)
                         </span>
                     </div>
-
                 </div>
             </div>
 
@@ -85,7 +88,9 @@ export default function StepPhysicalRequirements({
                         I-print o I-save ang Iyong Pre-Admission Slip
                     </h4>
                     <p className="text-emerald-100/90 text-xs max-w-xl leading-relaxed">
-                        Ipakita ang slip na ito o ang iyong Ticket Number sa Registrar pagdating mo sa paaralan upang mabilis na mai-verify ang iyong mga dokumento.
+                        Ipakita ang slip na ito o ang iyong Ticket Number sa
+                        Registrar pagdating mo sa paaralan upang mabilis na
+                        mai-verify ang iyong mga dokumento.
                     </p>
                 </div>
 
@@ -141,31 +146,38 @@ export default function StepPhysicalRequirements({
                         Saan at Kailan Magsu-submit?
                     </p>
                     <p className="text-[11px] text-amber-800/90 leading-relaxed">
-                        <strong>Bulusan National High School - Office of the School Registrar</strong><br />
-                        Lunes hanggang Biyernes: <strong>8:00 AM – 5:00 PM</strong> (Maliban kung pista-opisyal).
-                        Pagkatapos mai-abot ang mga papeles, agad na ia-apruba ng Registrar ang iyong rekord sa sistema.
+                        <strong>
+                            Bulusan National High School - Office of the School
+                            Registrar
+                        </strong>
+                        <br />
+                        Lunes hanggang Biyernes:{" "}
+                        <strong>8:00 AM – 5:00 PM</strong> (Maliban kung
+                        pista-opisyal). Pagkatapos mai-abot ang mga papeles,
+                        agad na ia-apruba ng Registrar ang iyong rekord sa
+                        sistema.
                     </p>
                 </div>
             </div>
 
             {/* Navigation Buttons */}
-            <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-stretch sm:items-center gap-3 pt-4 border-t border-slate-100">
                 <Button
                     type="button"
                     variant="outline"
                     onClick={onBack}
-                    className="flex items-center justify-center gap-2 text-xs font-bold py-2.5 px-4"
+                    className="flex items-center justify-center gap-2 text-xs font-bold py-3.5 px-4"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    <span>Bumalik sa Step 2</span>
+                    <span>Back</span>
                 </Button>
 
                 <Button
                     type="button"
                     onClick={onNext}
-                    className="flex items-center justify-center gap-2 text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs py-2.5 px-4"
+                    className="flex items-center justify-center gap-2 text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs py-3.5 px-4 w-full"
                 >
-                    <span>Tingnan ang Enrollment Status</span>
+                    <span>Enrollment Status</span>
                     <ArrowRight className="w-4 h-4" />
                 </Button>
             </div>

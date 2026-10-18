@@ -79,7 +79,7 @@ export default function ForgotPassword({ status: propStatus }) {
                         }`}
                     >
                         {/* Forgot Password Card */}
-                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/60 border border-slate-200/80">
+                        <div className="bg-white lg:rounded-3xl px-2 py-6 sm:p-8 lg:shadow-xl lg:shadow-slate-200/60 lg:border lg:border-slate-200/80">
                             <div className="mb-6 pb-4 border-b border-slate-100">
                                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 ring-4 ring-emerald-50 mb-3">
                                     <KeyRound className="w-6 h-6" />
@@ -88,7 +88,9 @@ export default function ForgotPassword({ status: propStatus }) {
                                     Forgot Password?
                                 </h2>
                                 <p className="text-xs text-slate-500 mt-1">
-                                    No worries! Enter your registered account email and we'll dispatch a secure recovery link.
+                                    No worries! Enter your registered account
+                                    email and we'll dispatch a secure recovery
+                                    link.
                                 </p>
                             </div>
 
@@ -97,7 +99,9 @@ export default function ForgotPassword({ status: propStatus }) {
                                 <div className="mb-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-start gap-3 animate-in fade-in duration-200 shadow-xs">
                                     <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="font-bold text-emerald-950">Recovery Link Sent</p>
+                                        <p className="font-bold text-emerald-950">
+                                            Recovery Link Sent
+                                        </p>
                                         <p className="text-[11px] mt-0.5 leading-relaxed text-emerald-800">
                                             {activeStatus}
                                         </p>
@@ -110,14 +114,22 @@ export default function ForgotPassword({ status: propStatus }) {
                                 <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-xs text-rose-700 animate-in fade-in duration-200">
                                     <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="font-bold">Request Notice</p>
-                                        <p className="text-[11px] mt-0.5">{serverErrors.email}</p>
+                                        <p className="font-bold">
+                                            Request Notice
+                                        </p>
+                                        <p className="text-[11px] mt-0.5">
+                                            {serverErrors.email}
+                                        </p>
                                     </div>
                                 </div>
                             )}
 
                             {/* Form */}
-                            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                            <form
+                                onSubmit={handleSubmit}
+                                className="space-y-4"
+                                noValidate
+                            >
                                 <Input
                                     id="email"
                                     type="email"
@@ -128,11 +140,18 @@ export default function ForgotPassword({ status: propStatus }) {
                                     value={data.email}
                                     onChange={(e) => {
                                         setData("email", e.target.value);
-                                        if (serverErrors.email) clearErrors("email");
+                                        if (serverErrors.email)
+                                            clearErrors("email");
                                     }}
                                     onBlur={() => setTouched(true)}
-                                    error={Boolean((touched && clientError) || serverErrors.email)}
-                                    errorMessage={(touched && clientError) || serverErrors.email}
+                                    error={Boolean(
+                                        (touched && clientError) ||
+                                        serverErrors.email,
+                                    )}
+                                    errorMessage={
+                                        (touched && clientError) ||
+                                        serverErrors.email
+                                    }
                                 />
 
                                 {/* Submit Button */}
@@ -163,7 +182,8 @@ export default function ForgotPassword({ status: propStatus }) {
 
                         {/* Footer */}
                         <div className="mt-6 text-center text-xs text-slate-400">
-                            &copy; {new Date().getFullYear()} Bulusan National High School. All rights reserved.
+                            &copy; {new Date().getFullYear()} Bulusan National
+                            High School. All rights reserved.
                         </div>
                     </div>
                 </div>

@@ -32,6 +32,7 @@ createInertiaApp({
     },
     progress: {
         color: "#10b981",
+
         showSpinner: false,
         delay: 250, // Lalabas lamang ang loading bar kung lumampas sa 250ms ang request
     },

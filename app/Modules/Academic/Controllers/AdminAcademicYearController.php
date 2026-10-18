@@ -78,6 +78,7 @@ class AdminAcademicYearController extends Controller
             Cache::forget('active_academic_year');
             Cache::forget('active_school_year');
             Cache::forget('active_academic_year_global');
+            Cache::forget('all_academic_years_global');
         });
 
         return redirect()->back()->with('success', "Academic Year {$validated['name']} created successfully.");
@@ -102,6 +103,7 @@ class AdminAcademicYearController extends Controller
             Cache::forget('active_academic_year');
             Cache::forget('active_school_year');
             Cache::forget('active_academic_year_global');
+            Cache::forget('all_academic_years_global');
 
             // Log Audit Trail
             \App\Modules\Identity\Models\AuditLog::record(
@@ -127,6 +129,7 @@ class AdminAcademicYearController extends Controller
         Cache::forget('active_academic_year');
         Cache::forget('active_school_year');
         Cache::forget('active_academic_year_global');
+        Cache::forget('all_academic_years_global');
 
         $status = $academicYear->is_enrollment_open ? 'OPENED' : 'CLOSED';
         return redirect()->back()->with('success', "Online Admission & Enrollment is now {$status} for S.Y. {$academicYear->name}.");
@@ -144,6 +147,7 @@ class AdminAcademicYearController extends Controller
         Cache::forget('active_academic_year');
         Cache::forget('active_school_year');
         Cache::forget('active_academic_year_global');
+        Cache::forget('all_academic_years_global');
 
         $status = $academicYear->is_grading_open ? 'OPENED' : 'CLOSED';
         return redirect()->back()->with('success', "Teacher Grade Encoding is now {$status} for S.Y. {$academicYear->name}.");
@@ -166,6 +170,8 @@ class AdminAcademicYearController extends Controller
 
         $academicYear->update($validated);
         Cache::forget('active_academic_year');
+        Cache::forget('active_academic_year_global');
+        Cache::forget('all_academic_years_global');
 
         return redirect()->back()->with('success', "Academic Year updated successfully.");
     }
@@ -185,6 +191,8 @@ class AdminAcademicYearController extends Controller
 
         $academicYear->delete();
         Cache::forget('active_academic_year');
+        Cache::forget('active_academic_year_global');
+        Cache::forget('all_academic_years_global');
 
         return redirect()->back()->with('success', 'Academic Year removed successfully.');
     }

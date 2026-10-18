@@ -26,14 +26,7 @@ export default function VerifyEmail({
     const [cooldown, setCooldown] = useState(cooldownSeconds);
     const [shake, setShake] = useState(false);
 
-    const {
-        data,
-        setData,
-        post,
-        processing,
-        errors,
-        clearErrors,
-    } = useForm({
+    const { data, setData, post, processing, errors, clearErrors } = useForm({
         otp: "",
     });
 
@@ -122,7 +115,10 @@ export default function VerifyEmail({
 
     const handlePaste = (e) => {
         e.preventDefault();
-        const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+        const pastedData = e.clipboardData
+            .getData("text")
+            .replace(/\D/g, "")
+            .slice(0, 6);
         if (!pastedData) return;
 
         const newDigits = ["", "", "", "", "", ""];
@@ -157,14 +153,18 @@ export default function VerifyEmail({
     const handleResend = () => {
         if (cooldown > 0) return;
 
-        router.post("/verify-email/resend", {}, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setCooldown(60);
-                setOtpDigits(["", "", "", "", "", ""]);
-                inputRefs.current[0]?.focus();
+        router.post(
+            "/verify-email/resend",
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setCooldown(60);
+                    setOtpDigits(["", "", "", "", "", ""]);
+                    inputRefs.current[0]?.focus();
+                },
             },
-        });
+        );
     };
 
     const handleLogout = () => {
@@ -189,7 +189,7 @@ export default function VerifyEmail({
                         }`}
                     >
                         {/* Verification Card */}
-                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/60 border border-slate-200/80 relative">
+                        <div className="bg-white lg:rounded-3xl px-2 py-6 sm:p-8 lg:shadow-xl lg:shadow-slate-200/60 lg:border lg:border-slate-200/80">
                             {/* Card Header */}
                             <div className="text-center mb-6">
                                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-600/30 ring-4 ring-emerald-50 mb-3">
@@ -199,7 +199,8 @@ export default function VerifyEmail({
                                     Verify your email
                                 </h2>
                                 <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                                    We sent a 6-digit security verification code to{" "}
+                                    We sent a 6-digit security verification code
+                                    to{" "}
                                     <span className="font-bold text-slate-800 underline decoration-emerald-500/50">
                                         {maskedEmail || email}
                                     </span>
@@ -219,8 +220,12 @@ export default function VerifyEmail({
                                 <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
                                     <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="font-bold">Verification Error</p>
-                                        <p className="text-[11px] mt-0.5">{errors.otp}</p>
+                                        <p className="font-bold">
+                                            Verification Error
+                                        </p>
+                                        <p className="text-[11px] mt-0.5">
+                                            {errors.otp}
+                                        </p>
                                     </div>
                                 </div>
                             )}
@@ -233,7 +238,10 @@ export default function VerifyEmail({
                             )}
 
                             {/* 6-Box OTP Form */}
-                            <form onSubmit={handleSubmitOtp} className="space-y-6">
+                            <form
+                                onSubmit={handleSubmitOtp}
+                                className="space-y-6"
+                            >
                                 <div>
                                     <label className="block text-xs font-bold text-center text-slate-700 mb-3 uppercase tracking-wider">
                                         Enter 6-Digit Code
@@ -247,26 +255,37 @@ export default function VerifyEmail({
                                         {otpDigits.map((digit, idx) => (
                                             <input
                                                 key={idx}
-                                                ref={(el) => (inputRefs.current[idx] = el)}
+                                                ref={(el) =>
+                                                    (inputRefs.current[idx] =
+                                                        el)
+                                                }
                                                 type="text"
                                                 inputMode="numeric"
                                                 pattern="[0-9]*"
                                                 maxLength={idx === 0 ? 6 : 1}
                                                 value={digit}
-                                                onChange={(e) => handleDigitChange(idx, e.target.value)}
-                                                onKeyDown={(e) => handleKeyDown(idx, e)}
+                                                onChange={(e) =>
+                                                    handleDigitChange(
+                                                        idx,
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                onKeyDown={(e) =>
+                                                    handleKeyDown(idx, e)
+                                                }
                                                 className={`w-11 h-13 sm:w-13 sm:h-15 text-center text-xl sm:text-2xl font-black font-mono rounded-2xl border transition-all duration-150 focus:outline-none focus:ring-3 bg-slate-50/60 ${
                                                     errors.otp
                                                         ? "border-rose-300 text-rose-900 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/30"
                                                         : digit
-                                                        ? "border-emerald-500 text-emerald-950 focus:border-emerald-600 focus:ring-emerald-500/20 bg-emerald-50/20"
-                                                        : "border-slate-200 text-slate-900 focus:border-emerald-600 focus:ring-emerald-500/20 hover:border-slate-300"
+                                                          ? "border-emerald-500 text-emerald-950 focus:border-emerald-600 focus:ring-emerald-500/20 bg-emerald-50/20"
+                                                          : "border-slate-200 text-slate-900 focus:border-emerald-600 focus:ring-emerald-500/20 hover:border-slate-300"
                                                 }`}
                                             />
                                         ))}
                                     </div>
                                     <p className="text-[11px] text-center text-slate-400 mt-2">
-                                        Tip: You can paste all 6 digits directly into any box
+                                        Tip: You can paste all 6 digits directly
+                                        into any box
                                     </p>
                                 </div>
 
@@ -276,7 +295,10 @@ export default function VerifyEmail({
                                     variant="emerald"
                                     size="lg"
                                     loading={processing}
-                                    disabled={processing || otpDigits.join("").length < 6}
+                                    disabled={
+                                        processing ||
+                                        otpDigits.join("").length < 6
+                                    }
                                     className="w-full py-3.5 rounded-2xl font-black text-sm shadow-lg shadow-emerald-700/25 justify-center"
                                 >
                                     <KeyRound className="w-4 h-4 mr-2" />
@@ -313,7 +335,9 @@ export default function VerifyEmail({
                                         className="text-xs text-slate-400 hover:text-rose-600 transition inline-flex items-center gap-1 font-medium cursor-pointer"
                                     >
                                         <LogOut className="w-3.5 h-3.5" />
-                                        <span>Use another account / Log out</span>
+                                        <span>
+                                            Use another account / Log out
+                                        </span>
                                     </button>
                                 </div>
                             </div>
@@ -321,7 +345,8 @@ export default function VerifyEmail({
 
                         {/* Footer Info */}
                         <div className="mt-6 text-center text-xs text-slate-400">
-                            &copy; {new Date().getFullYear()} Bulusan National High School. All rights reserved.
+                            &copy; {new Date().getFullYear()} Bulusan National
+                            High School. All rights reserved.
                         </div>
                     </div>
                 </div>

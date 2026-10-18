@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Head, Link } from "@inertiajs/react";
+import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
 import Button from "@/Components/Atoms/Button";
 import Input from "@/Components/Atoms/Input";
 import OfflineBanner from "@/Components/Molecules/OfflineBanner";
 import AuthShowcasePanel from "@/Components/Organisms/Auth/AuthShowcasePanel";
-import { Lock, Mail, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Lock, Mail, CheckCircle2, XCircle, AlertCircle, School, ShieldCheck } from "lucide-react";
 import { validateEmail, validatePassword } from "@/Utils/authValidation";
 
 export default function Login() {
+    const school = useSchoolSettings();
     const [touched, setTouched] = useState({});
     const [clientErrors, setClientErrors] = useState({});
     const [shake, setShake] = useState(false);
@@ -85,23 +87,71 @@ export default function Login() {
 
     return (
         <div className="min-h-screen bg-slate-900 flex flex-col justify-between font-sans selection:bg-emerald-500 selection:text-white">
-            <Head title="Sign In - Bulusan National High School" />
+            <Head title={`Sign In - ${school.school_name}`} />
             <OfflineBanner />
 
             {/* Split Screen Container */}
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-screen">
-                {/*  LEFT SIDE: Brand & Portal Showcase */}
+                {/*  LEFT SIDE: Brand & Portal Showcase (Desktop) */}
                 <AuthShowcasePanel mode="login" />
 
                 {/* 💻 RIGHT SIDE: Login Form Panel */}
-                <div className="lg:col-span-7 bg-slate-50 flex items-center justify-center p-6 sm:p-10 lg:p-12">
+                <div className="lg:col-span-7 bg-slate-50 flex flex-col lg:items-center lg:justify-center p-0 sm:p-10 lg:p-12 min-h-screen">
+                    {/* 📱 MOBILE GREEN HERO BANNER WITH HALF-VISIBLE BLURRED WATERMARK LOGO */}
+                    <div className="lg:hidden relative overflow-hidden bg-gradient-to-br from-[#042219] via-[#0b4635] to-[#062d21] text-white px-5 pt-8 pb-14 shadow-lg">
+                        {/* Ambient Glow */}
+                        <div className="pointer-events-none absolute -top-16 -left-16 w-48 h-48 rounded-full bg-emerald-400/15 blur-2xl" />
+
+                        {/* Half-Visible Blurred Watermark Logo on Right Edge */}
+                        {school.logo_url ? (
+                            <img
+                                src={school.logo_url}
+                                alt=""
+                                aria-hidden="true"
+                                className="pointer-events-none select-none absolute -right-16 -bottom-10 w-52 h-52 object-contain opacity-20 blur-[2px]"
+                            />
+                        ) : (
+                            <School
+                                aria-hidden="true"
+                                className="pointer-events-none select-none absolute -right-14 -bottom-10 w-48 h-48 text-emerald-300 opacity-15 blur-[2px]"
+                            />
+                        )}
+
+                        {/* Foreground Mobile Branding */}
+                        <div className="relative z-10 flex items-center gap-3.5">
+                            {school.logo_url ? (
+                                <img
+                                    src={school.logo_url}
+                                    alt={school.short_name}
+                                    className="w-12 h-12 object-contain shrink-0 drop-shadow-md"
+                                />
+                            ) : (
+                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/30 border border-emerald-300/30 flex items-center justify-center text-white font-black text-lg shadow-md shrink-0">
+                                    {school.initial}
+                                </div>
+                            )}
+                            <div className="min-w-0 pr-8">
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-400/15 border border-emerald-300/25 text-emerald-200 text-[10px] font-semibold mb-1">
+                                    <ShieldCheck className="w-3 h-3 text-emerald-300 shrink-0" />
+                                    <span>Official Academic Portal</span>
+                                </div>
+                                <h1 className="text-sm font-black tracking-tight text-white uppercase leading-snug">
+                                    {school.school_name}
+                                </h1>
+                                <p className="text-[11px] font-medium text-emerald-200/85 truncate mt-0.5">
+                                    {school.tagline}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div
-                        className={`w-full max-w-lg transition-all duration-300 ${
+                        className={`w-full max-w-lg mx-auto flex-1 lg:flex-initial flex flex-col justify-between lg:justify-center px-4 sm:px-0 -mt-6 sm:mt-0 relative z-20 transition-all duration-300 ${
                             shake ? "animate-shake" : ""
                         }`}
                     >
                         {/* Login Card */}
-                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/60 border border-slate-200/80">
+                        <div className="bg-white rounded-3xl px-5 py-6 sm:p-8 shadow-xl shadow-slate-900/5 lg:shadow-slate-200/60 border border-slate-200/80">
                             {/* Title */}
                             <div className="mb-6 pb-4 border-b border-slate-100">
                                 <h2 className="text-xl font-extrabold text-slate-900">
@@ -264,24 +314,23 @@ export default function Login() {
                                     <span>Sign In</span>
                                 </Button>
 
-                                <div className="flex flex-col justify-center items-center">
-                                    <span className="text-slate-600 font-normal  text-sm">
-                                        New student or transferee?
-                                    </span>
-                                    <Link
-                                        href="/register"
-                                        className="flex-1  py-2.5 px-4 rounded-xl text-xs font-bold text-blue-600 hover:text-slate-900 hover:bg-slate-200/50 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <span>Apply / Register</span>
-                                    </Link>
+                                <div className="pt-4 mt-2 border-t border-slate-100 text-center">
+                                    <p className="text-xs text-slate-500">
+                                        New student or transferee?{" "}
+                                        <Link
+                                            href="/register"
+                                            className="font-semibold text-emerald-700 hover:text-emerald-800 hover:underline underline-offset-4 transition-colors ml-1"
+                                        >
+                                            Apply / Register
+                                        </Link>
+                                    </p>
                                 </div>
                             </form>
                         </div>
 
                         {/* Footer */}
                         <div className="mt-6 text-center text-xs text-slate-400">
-                            &copy; {new Date().getFullYear()} Bulusan National
-                            High School. All rights reserved.
+                            &copy; {new Date().getFullYear()} {school.school_name}. All rights reserved.
                         </div>
                     </div>
                 </div>

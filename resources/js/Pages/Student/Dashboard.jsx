@@ -6,6 +6,7 @@ import Badge from "@/Components/Atoms/Badge";
 import AnnouncementCard from "@/Components/Organisms/Student/Announcements/AnnouncementCard";
 import AdmissionQueueBanner from "@/Components/Organisms/Student/AdmissionQueueBanner";
 import { useAuth } from "@/Hooks/useAuth";
+import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
 import { formatLRN } from "@/Utils/formatters";
 import {
     Megaphone,
@@ -15,10 +16,12 @@ import {
     BookOpen,
     Clock,
     Ticket,
+    School,
 } from "lucide-react";
 
 export default function StudentDashboard({ announcements = [], enrollment = null, queuePosition = null }) {
     const { user } = useAuth();
+    const school = useSchoolSettings();
     const feedList = Array.isArray(announcements) ? announcements : (announcements?.data || []);
 
     const isPending = enrollment ? enrollment.status === "PENDING_REVIEW" : false;
@@ -43,74 +46,99 @@ export default function StudentDashboard({ announcements = [], enrollment = null
 
     return (
         <StudentLayout title="Student Feed & Dashboard">
-            <Head title="Student Portal - Bulusan NHS" />
+            <Head title={`Student Portal - ${school.short_name}`} />
 
-            <div className="space-y-4 sm:space-y-6">
-                {/* 🎟️ Real-Time Admission Queue Notification Banner (Kapag bago/pending pa lang) */}
-                {isPending && (
-                    <AdmissionQueueBanner
-                        enrollment={enrollment}
-                        queuePosition={queuePosition}
-                    />
-                )}
-
-                {/* 🌟 BNHS Green Student Welcome Banner (Maximized on Mobile) */}
-                <div className="-mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] rounded-b-3xl sm:rounded-2xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border-b sm:border border-emerald-400/20">
+            <div className="sm:space-y-6">
+                {/* 🌟 LAYER 1 (z-10): BNHS Green Student Welcome Banner Backdrop */}
+                <div className="relative z-10 -mx-2.5 -mt-3.5 sm:mx-0 sm:mt-0 bg-gradient-to-br from-[#042219] via-[#0b4635] to-[#062d21] sm:rounded-2xl px-5 pt-4 pb-12 sm:p-6 text-white shadow-lg overflow-hidden sm:border border-emerald-400/15">
                     {/* Ambient Glows */}
-                    <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
-                    <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-teal-400/15 rounded-full blur-2xl pointer-events-none" />
+                    <div className="hidden sm:block absolute -top-12 -right-12 w-48 h-48 bg-emerald-400/15 rounded-full blur-2xl pointer-events-none" />
+                    <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-teal-400/10 rounded-full blur-2xl pointer-events-none" />
 
-                    <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
-                                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-xs shadow-2xs">
-                                    {sectionName}
-                                </span>
+                    {/* Half-Visible Blurred Watermark Logo on Right Edge */}
+                    {school.logo_url ? (
+                        <img
+                            src={school.logo_url}
+                            alt=""
+                            aria-hidden="true"
+                            className="pointer-events-none select-none absolute -right-14 -bottom-6 w-48 h-48 sm:w-52 sm:h-52 object-contain opacity-20 blur-[2px]"
+                        />
+                    ) : (
+                        <School
+                            aria-hidden="true"
+                            className="pointer-events-none select-none absolute -right-12 -bottom-6 w-44 h-44 sm:w-48 sm:h-48 text-emerald-300 opacity-15 blur-[2px]"
+                        />
+                    )}
 
+                    <div className="relative z-10">
+                        {/* Top Status & S.Y. Row */}
+                        <div className="flex items-center justify-between gap-2 mb-2.5">
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-100 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
+                                <span className={`w-1.5 h-1.5 rounded-full ${isPending ? "bg-amber-400" : "bg-emerald-400"}`} />
+                                {sectionName}
+                            </span>
+
+                            <div className="flex items-center gap-1.5">
                                 {isPending ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 shadow-2xs">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/30">
                                         <Clock className="w-3 h-3" />
-                                        QUEUE: {enrollment?.tracking_number || "BNHS-Q001"}
+                                        {enrollment?.tracking_number || "BNHS-Q001"}
                                     </span>
                                 ) : (
-                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-400 text-slate-950 shadow-2xs">
-                                        ENROLLED
+                                    <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 border border-emerald-400/25">
+                                        Enrolled
                                     </span>
                                 )}
-
-                                <span className="text-[10px] sm:text-xs font-semibold text-emerald-200 bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                                    S.Y. 2026-2027
+                                <span className="text-[11px] text-emerald-200/75 font-normal hidden xs:inline">
+                                    • S.Y. {enrollment?.academic_year?.name || "2026-2027"}
                                 </span>
                             </div>
-                            <h2 className="text-lg sm:text-2xl font-black tracking-tight text-white drop-shadow-xs">
-                                Kamusta, {user?.name || "Juan Dela Cruz"}! 👋
-                            </h2>
-                            <div className="text-emerald-100 text-xs sm:text-sm mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                                <span>
-                                    Class Adviser: <strong className="font-bold text-white">{adviserName}</strong>
-                                </span>
-                                <span className="text-emerald-300/40 hidden sm:inline">•</span>
-                                <span>
-                                    LRN: <strong className="font-mono font-bold text-emerald-300 bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-500/20">{formatLRN(user?.lrn || "102938475612")}</strong>
+                        </div>
+
+                        {/* Student Greeting */}
+                        <h2 className="text-base sm:text-xl font-semibold tracking-tight text-white">
+                            Kamusta, {user?.name || "Juan Dela Cruz"}
+                        </h2>
+
+                        {/* Clean Metadata Footer */}
+                        <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-emerald-100/80">
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-emerald-200/70">Adviser:</span>
+                                <span className="font-medium text-white">{adviserName}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-emerald-200/70">LRN:</span>
+                                <span className="font-mono text-emerald-200 font-medium">
+                                    {formatLRN(user?.lrn || "102938475612")}
                                 </span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 💻 Responsive 2-Column Grid for Laptop Screens */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                    {/* LEFT COLUMN: School Feed with Organism Cards */}
-                    <div className="lg:col-span-2 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
-                                <Megaphone className="w-4 h-4 text-emerald-600 shrink-0" />
-                                <span>School Announcements</span>
-                                <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-                                    {feedList.length}
-                                </span>
-                            </h3>
-                        </div>
+                {/* 📱 LAYER 2 (z-20): Overlapping Rounded Content Sheet on Mobile */}
+                <div className="relative z-20 -mt-6 sm:mt-0 -mx-2.5 sm:mx-0 px-3.5 pt-5 pb-2 sm:p-0 bg-[#f4f7fa] sm:bg-transparent rounded-t-3xl sm:rounded-none shadow-[0_-6px_20px_rgba(0,0,0,0.08)] sm:shadow-none space-y-4 sm:space-y-6">
+                    {/* 🎟️ Real-Time Admission Queue Notification Banner (Kapag bago/pending pa lang) */}
+                    {isPending && (
+                        <AdmissionQueueBanner
+                            enrollment={enrollment}
+                            queuePosition={queuePosition}
+                        />
+                    )}
+
+                    {/* 💻 Responsive 2-Column Grid for Laptop Screens */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                        {/* LEFT COLUMN: School Feed with Organism Cards */}
+                        <div className="lg:col-span-2 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+                                    <Megaphone className="w-4 h-4 text-emerald-600 shrink-0" />
+                                    <span>School Announcements</span>
+                                    <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                                        {feedList.length}
+                                    </span>
+                                </h3>
+                            </div>
 
                         {feedList.length === 0 ? (
                             <Card className="text-center py-12 text-slate-400">
@@ -175,6 +203,7 @@ export default function StudentDashboard({ announcements = [], enrollment = null
                             </Link>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </StudentLayout>

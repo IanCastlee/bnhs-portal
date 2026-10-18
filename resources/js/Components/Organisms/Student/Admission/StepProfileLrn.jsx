@@ -43,7 +43,8 @@ export default function StepProfileLrn({ user, enrollment, onNext }) {
                         DepEd 12-Digit LRN
                     </span>
                     <span className="font-mono font-bold text-emerald-800 text-sm">
-                        {user?.lrn || "Pending LIS Assignment (Optional for New)"}
+                        {user?.lrn ||
+                            "Pending LIS Assignment (Optional for New)"}
                     </span>
                 </div>
                 <div>
@@ -51,8 +52,10 @@ export default function StepProfileLrn({ user, enrollment, onNext }) {
                         Applying Level & Track
                     </span>
                     <span className="font-bold text-slate-900 text-sm">
-                        {(enrollment?.grade_level?.name || enrollment?.gradeLevel?.name || "Grade 7")} •{" "}
-                        {enrollment?.student_type || "NEW"}
+                        {enrollment?.grade_level?.name ||
+                            enrollment?.gradeLevel?.name ||
+                            "Grade 7"}{" "}
+                        • {enrollment?.student_type || "NEW"}
                     </span>
                 </div>
                 <div>
@@ -73,7 +76,7 @@ export default function StepProfileLrn({ user, enrollment, onNext }) {
                     variant="emerald"
                     size="md"
                     onClick={onNext}
-                    className="w-full sm:w-auto"
+                    className="w-full py-3.5 sm:w-auto"
                 >
                     <span>Next: Household Info</span>
                     <ArrowRight className="w-4 h-4 ml-1.5" />

@@ -48,6 +48,7 @@ class CloudinaryService
                 'resource_type' => $result['resource_type'] ?? $resourceType,
                 'format'        => $result['format'] ?? ($isImage ? 'webp' : 'pdf'),
                 'bytes'         => $result['bytes'] ?? null,
+                'secure_url'    => $result['secure_url'] ?? null,
             ];
         } catch (\Throwable $e) {
             Log::error("Cloudinary upload error: " . $e->getMessage(), [
@@ -55,6 +56,41 @@ class CloudinaryService
                 'folder'   => $folder,
             ]);
             throw $e;
+        } finally {
+            error_reporting($prevErrorReporting);
+        }
+    }
+
+    /**
+     * 🌐 Public CDN Upload for School Logo & Official Branding Assets
+     */
+    public function uploadPublicImage(string $filePath, string $folder = 'bnhs_branding'): string
+    {
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(180);
+        }
+
+        $prevErrorReporting = error_reporting(E_ALL & ~E_DEPRECATED);
+
+        try {
+            $result = \Cloudinary\Uploader::upload($filePath, [
+                'folder'        => $folder,
+                'type'          => 'upload',
+                'resource_type' => 'image',
+                'format'        => 'webp',
+                'timeout'       => 20,
+            ]);
+
+            if (!empty($result['secure_url'])) {
+                return $result['secure_url'];
+            }
+
+            return \Cloudinary::cloudinary_url($result['public_id'], [
+                'type'          => 'upload',
+                'resource_type' => 'image',
+                'format'        => $result['format'] ?? 'webp',
+                'secure'        => true,
+            ]);
         } finally {
             error_reporting($prevErrorReporting);
         }

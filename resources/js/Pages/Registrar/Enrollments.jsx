@@ -37,8 +37,6 @@ import {
 
 export default function Enrollments({
     enrollments,
-    sections = [],
-    gradeLevels = [],
     filters = {},
     counts = {},
 }) {
@@ -248,13 +246,6 @@ export default function Enrollments({
     };
 
     // Defensive array conversions
-    const sectionList = Array.isArray(sections)
-        ? sections
-        : sections?.data ||
-          (typeof sections === "object" && sections !== null
-              ? Object.values(sections)
-              : []);
-
     const enrollmentList = Array.isArray(enrollments?.data)
         ? enrollments.data
         : Array.isArray(enrollments)
@@ -285,119 +276,134 @@ export default function Enrollments({
                     </div>
                 </div>
 
-                {/* 📊 Status Filter Tabs (Diskarte A: Separated Queues for 100% Indexed Performance) */}
-                <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <button
-                            onClick={() =>
-                                handleStatusFilter("PENDING_COMPLETE")
-                            }
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                                selectedStatus === "PENDING_COMPLETE"
-                                    ? "bg-emerald-700 text-white shadow-xs"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
-                        >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>
-                                Ready for Review ({counts.pending_complete || 0}
-                                )
-                            </span>
-                            <span
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${
+                {/* 📊 Status Filter Tabs + Right-Aligned Dropdown & Compact Search Bar */}
+                <div className="bg-white px-3 py-2 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
+                        {/* Left: Status Tabs */}
+                        <div className="flex flex-wrap lg:flex-nowrap items-center gap-1.5">
+                            <button
+                                onClick={() =>
+                                    handleStatusFilter("PENDING_COMPLETE")
+                                }
+                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                                     selectedStatus === "PENDING_COMPLETE"
-                                        ? "bg-emerald-800 text-white"
-                                        : "bg-emerald-100 text-emerald-800"
+                                        ? "bg-emerald-700 text-white shadow-xs"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
-                                Complete
-                            </span>
-                        </button>
+                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                <span>
+                                    Ready for Review (
+                                    {counts.pending_complete || 0})
+                                </span>
+                            </button>
 
-                        <button
-                            onClick={() =>
-                                handleStatusFilter("PENDING_INCOMPLETE")
-                            }
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                                selectedStatus === "PENDING_INCOMPLETE"
-                                    ? "bg-amber-600 text-white shadow-xs"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
-                        >
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            <span>
-                                Incomplete Form (
-                                {counts.pending_incomplete || 0})
-                            </span>
-                            <span
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${
+                            <button
+                                onClick={() =>
+                                    handleStatusFilter("PENDING_INCOMPLETE")
+                                }
+                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                                     selectedStatus === "PENDING_INCOMPLETE"
-                                        ? "bg-amber-700 text-white"
-                                        : "bg-amber-100 text-amber-900"
+                                        ? "bg-amber-600 text-white shadow-xs"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
-                                Action Needed
-                            </span>
-                        </button>
+                                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                <span>
+                                    Incomplete Form (
+                                    {counts.pending_incomplete || 0})
+                                </span>
+                            </button>
 
-                        <button
-                            onClick={() => handleStatusFilter("APPROVED")}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                                selectedStatus === "APPROVED"
-                                    ? "bg-emerald-600 text-white shadow-xs"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
-                        >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>Approved ({counts.approved || 0})</span>
-                        </button>
+                            <button
+                                onClick={() => handleStatusFilter("APPROVED")}
+                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                                    selectedStatus === "APPROVED" ||
+                                    selectedStatus === "APPROVED_COMPLETE" ||
+                                    selectedStatus === "APPROVED_INCOMPLETE"
+                                        ? "bg-emerald-600 text-white shadow-xs"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                }`}
+                            >
+                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                <span>Approved ({counts.approved || 0})</span>
+                            </button>
 
-                        <button
-                            onClick={() => handleStatusFilter("REJECTED")}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                                selectedStatus === "REJECTED"
-                                    ? "bg-rose-600 text-white shadow-xs"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
-                        >
-                            <XCircle className="w-3.5 h-3.5" />
-                            <span>Returned ({counts.rejected || 0})</span>
-                        </button>
+                            <button
+                                onClick={() => handleStatusFilter("REJECTED")}
+                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                                    selectedStatus === "REJECTED"
+                                        ? "bg-rose-600 text-white shadow-xs"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                }`}
+                            >
+                                <XCircle className="w-3.5 h-3.5 shrink-0" />
+                                <span>Returned ({counts.rejected || 0})</span>
+                            </button>
 
-                        <button
-                            onClick={() => handleStatusFilter("ALL")}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                                selectedStatus === "ALL"
-                                    ? "bg-slate-900 text-white shadow-xs"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
-                        >
-                            <Layers className="w-3.5 h-3.5" />
-                            <span>All Records ({counts.total || 0})</span>
-                        </button>
-                    </div>
-
-                    <form
-                        onSubmit={handleSearch}
-                        className="flex items-center gap-2 w-full sm:w-auto"
-                    >
-                        <div className="relative flex-1 sm:w-64">
-                            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                            <Input
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Search student, ticket, LRN..."
-                                className="pl-9 h-10 text-xs"
-                            />
+                            <button
+                                onClick={() => handleStatusFilter("ALL")}
+                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                                    selectedStatus === "ALL"
+                                        ? "bg-slate-900 text-white shadow-xs"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                }`}
+                            >
+                                <Layers className="w-3.5 h-3.5 shrink-0" />
+                                <span>All Records ({counts.total || 0})</span>
+                            </button>
                         </div>
-                        <Button
-                            type="submit"
-                            variant="outline"
-                            className="h-10 text-xs font-bold"
-                        >
-                            Search
-                        </Button>
-                    </form>
+
+                        {/* Right: Approved Filter Dropdown + Compact Search Bar */}
+                        <div className="flex items-center gap-1.5 w-full lg:w-auto justify-end shrink-0">
+                            {(selectedStatus === "APPROVED" ||
+                                selectedStatus === "APPROVED_COMPLETE" ||
+                                selectedStatus === "APPROVED_INCOMPLETE") && (
+                                <select
+                                    value={selectedStatus}
+                                    onChange={(e) =>
+                                        handleStatusFilter(e.target.value)
+                                    }
+                                    className="h-8 px-2.5 rounded-xl border border-emerald-300 bg-emerald-50/70 text-emerald-950 text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 cursor-pointer shrink-0"
+                                >
+                                    <option value="APPROVED">
+                                        All Approved ({counts.approved || 0})
+                                    </option>
+                                    <option value="APPROVED_COMPLETE">
+                                        Complete ({counts.approved_complete || 0})
+                                    </option>
+                                    <option value="APPROVED_INCOMPLETE">
+                                        Incomplete / To Follow (
+                                        {counts.approved_incomplete || 0})
+                                    </option>
+                                </select>
+                            )}
+
+                            <form
+                                onSubmit={handleSearch}
+                                className="flex items-center gap-1.5 flex-1 sm:flex-initial shrink-0"
+                            >
+                                <div className="relative flex-1 sm:w-40 xl:w-44">
+                                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                    <input
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={(e) =>
+                                            setSearchTerm(e.target.value)
+                                        }
+                                        placeholder="Search name, LRN..."
+                                        className="w-full h-8 pl-8 pr-2.5 rounded-xl border border-slate-200 bg-slate-50/60 text-[11px] font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition"
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="h-8 px-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-bold shrink-0 transition cursor-pointer"
+                                >
+                                    Search
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 {/* 📋 Application Table */}
@@ -541,11 +547,42 @@ export default function Enrollments({
                                                             </span>
                                                         ))}
                                                     {item.status ===
-                                                        "APPROVED" && (
-                                                        <Badge variant="success">
-                                                            Approved
-                                                        </Badge>
-                                                    )}
+                                                        "APPROVED" &&
+                                                        (() => {
+                                                            const isToFollow =
+                                                                !hasHousehold ||
+                                                                /to follow|conditionally approved|pending|incomplete|kulang/i.test(
+                                                                    item.remarks ||
+                                                                        "",
+                                                                );
+                                                            return isToFollow ? (
+                                                                <div className="space-y-1">
+                                                                    <div className="flex flex-wrap items-center gap-1">
+                                                                        <Badge variant="success">
+                                                                            Approved
+                                                                        </Badge>
+                                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                                                            <AlertTriangle className="w-3 h-3 text-amber-600" />
+                                                                            To Follow / Incomplete
+                                                                        </span>
+                                                                    </div>
+                                                                    {item.remarks && (
+                                                                        <p className="text-[11px] text-amber-800 font-semibold max-w-[240px] truncate" title={item.remarks}>
+                                                                            {item.remarks}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <Badge variant="success">
+                                                                        Approved
+                                                                    </Badge>
+                                                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                                                        Complete
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     {item.status ===
                                                         "REJECTED" && (
                                                         <Badge variant="danger">
@@ -1151,8 +1188,14 @@ export default function Enrollments({
                                                         {isSubmitting ? (
                                                             <>
                                                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                                Approving...
+                                                                {selectedEnrollment.status ===
+                                                                "APPROVED"
+                                                                    ? "Saving..."
+                                                                    : "Approving..."}
                                                             </>
+                                                        ) : selectedEnrollment.status ===
+                                                          "APPROVED" ? (
+                                                            "Save & Update Remarks"
                                                         ) : (
                                                             "Approve Application"
                                                         )}
