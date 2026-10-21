@@ -5,7 +5,15 @@ import Button from "@/Components/Atoms/Button";
 import Input from "@/Components/Atoms/Input";
 import OfflineBanner from "@/Components/Molecules/OfflineBanner";
 import AuthShowcasePanel from "@/Components/Organisms/Auth/AuthShowcasePanel";
-import { Lock, Mail, CheckCircle2, XCircle, AlertCircle, School, ShieldCheck } from "lucide-react";
+import {
+    Lock,
+    Mail,
+    CheckCircle2,
+    XCircle,
+    AlertCircle,
+    School,
+    ShieldCheck,
+} from "lucide-react";
 import { validateEmail, validatePassword } from "@/Utils/authValidation";
 
 export default function Login() {
@@ -224,10 +232,10 @@ export default function Login() {
                                         (touched.email && clientErrors.email) ||
                                         serverErrors.email,
                                     )}
-                                    // errorMessage={
-                                    //     (touched.email && clientErrors.email) ||
-                                    //     serverErrors.email
-                                    // }
+                                    errorMessage={
+                                        (touched.email && clientErrors.email) ||
+                                        serverErrors.email
+                                    }
                                     // rightElement={
                                     //     (touched.email && clientErrors.email) ||
                                     //     serverErrors.email ? (
@@ -330,7 +338,8 @@ export default function Login() {
 
                         {/* Footer */}
                         <div className="mt-6 text-center text-xs text-slate-400">
-                            &copy; {new Date().getFullYear()} {school.school_name}. All rights reserved.
+                            &copy; {new Date().getFullYear()}{" "}
+                            {school.school_name}. All rights reserved.
                         </div>
                     </div>
                 </div>

@@ -19,6 +19,20 @@ class Strand extends Model
         'is_active' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        $flush = function () {
+            try {
+                \Illuminate\Support\Facades\Cache::tags(['curriculum'])->flush();
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Cache::forget('curriculum_strands');
+            }
+        };
+
+        static::saved($flush);
+        static::deleted($flush);
+    }
+
     public function sections(): HasMany
     {
         return $this->hasMany(Section::class);

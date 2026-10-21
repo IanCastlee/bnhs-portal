@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Modules\Grading\Controllers\TeacherGradingController;
+use App\Modules\Grading\Controllers\TeacherAdvisoryController;
 use App\Modules\Grading\Controllers\RegistrarGradingController;
 
 // 👨‍🏫 TEACHER / ADVISER PORTAL ROUTES
@@ -11,11 +12,11 @@ Route::middleware(['auth', 'role:TEACHER'])->prefix('teacher')->name('teacher.')
     Route::get('/grades', [TeacherGradingController::class, 'dashboard'])->name('grades.index');
 
     // 📋 Class Adviser Grade Consolidation & Review
-    Route::get('/advisory', [TeacherGradingController::class, 'advisoryIndex'])->name('advisory.index');
-    Route::post('/advisory/{section}/forward-registrar', [TeacherGradingController::class, 'forwardSectionToRegistrar'])->name('advisory.forward');
+    Route::get('/advisory', [TeacherAdvisoryController::class, 'advisoryIndex'])->name('advisory.index');
+    Route::post('/advisory/{section}/forward-registrar', [TeacherAdvisoryController::class, 'forwardSectionToRegistrar'])->name('advisory.forward');
 
     // 📋 Section Class Roster (Cursor / Fast Paginated)
-    Route::get('/sections/{section}/roster', [TeacherGradingController::class, 'sectionRoster'])->name('sections.roster');
+    Route::get('/sections/{section}/roster', [TeacherAdvisoryController::class, 'sectionRoster'])->name('sections.roster');
 
     // 📝 DepEd DO 8 Grade Sheet (Section + Subject)
     Route::get('/sections/{section}/subjects/{subject}/grades', [TeacherGradingController::class, 'gradeSheet'])->name('grades.sheet');

@@ -37,6 +37,21 @@ class Announcement extends Model
         });
     }
 
+    /**
+     * Retrieve cached recent announcements for student feeds (safe plain array).
+     */
+    public static function getCachedFeed(int $limit = 20): array
+    {
+        return Cache::remember('school_announcements_first_20', 600, function () use ($limit) {
+            return static::with('author:id,name,role')
+                ->orderByDesc('is_pinned')
+                ->orderByDesc('id')
+                ->take($limit)
+                ->get()
+                ->toArray();
+        });
+    }
+
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id', 'id');

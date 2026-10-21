@@ -56,15 +56,8 @@ class StudentAcademicController extends Controller
             return redirect()->route('student.admission');
         }
 
-        // 2. Announcements Cache (10-minute TTL)
-        $announcements = Cache::remember('school_announcements_first_20', 600, function () {
-            return Announcement::with('author:id,name,role')
-                ->orderByDesc('is_pinned')
-                ->orderByDesc('id')
-                ->take(20)
-                ->get()
-                ->toArray();
-        });
+        // 2. Announcements Cache (10-minute TTL, Model-driven)
+        $announcements = Announcement::getCachedFeed();
 
         // 3. Quick Grade Summary
         $gradeCount = Grade::where('student_id', $user->id)

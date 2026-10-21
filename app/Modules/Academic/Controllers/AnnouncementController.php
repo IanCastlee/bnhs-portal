@@ -79,9 +79,6 @@ class AnnouncementController extends Controller
             'is_pinned' => $validated['is_pinned'] ?? false,
         ]);
 
-        // ⚡ Invalidate Student Feed Cache
-        Cache::forget('school_announcements_first_20');
-
         return back()->with('success', 'Announcement published successfully to student feed!');
     }
 
@@ -117,8 +114,6 @@ class AnnouncementController extends Controller
             'is_pinned' => $validated['is_pinned'] ?? $announcement->is_pinned,
         ]);
 
-        Cache::forget('school_announcements_first_20');
-
         return back()->with('success', 'Announcement updated successfully!');
     }
 
@@ -131,8 +126,6 @@ class AnnouncementController extends Controller
             'is_pinned' => ! $announcement->is_pinned,
         ]);
 
-        Cache::forget('school_announcements_first_20');
-
         $status = $announcement->is_pinned ? 'pinned to top of feed' : 'unpinned';
         return back()->with('success', "Announcement {$status}!");
     }
@@ -143,7 +136,6 @@ class AnnouncementController extends Controller
     public function destroy(Announcement $announcement): RedirectResponse
     {
         $announcement->delete();
-        Cache::forget('school_announcements_first_20');
 
         return back()->with('success', 'Announcement deleted successfully.');
     }

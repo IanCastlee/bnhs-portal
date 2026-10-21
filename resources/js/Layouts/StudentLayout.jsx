@@ -20,7 +20,6 @@ import {
     ChevronDown,
     Lock,
 } from "lucide-react";
-
 export default function StudentLayout({ children, title = "Student Portal" }) {
     const { user } = useAuth();
     const { url, props } = usePage();
@@ -430,7 +429,9 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                     {!isCollapsed ? (
                         <div className="space-y-0.5">
                             <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 gap-2">
-                                <span className="truncate">{school.short_name}</span>
+                                <span className="truncate">
+                                    {school.short_name}
+                                </span>
                                 <span className="font-mono text-emerald-400 text-[10px] bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.2 rounded shrink-0">
                                     ID: {school.school_id}
                                 </span>

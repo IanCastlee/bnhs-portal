@@ -5,6 +5,7 @@ namespace App\Modules\Academic\Models;
 use App\Modules\Enrollment\Models\Enrollment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class AcademicYear extends Model
 {
@@ -30,8 +31,8 @@ class AcademicYear extends Model
         $flush = function () {
             self::$activeArrayMemo = null;
             self::$activeArrayLoaded = false;
-            \Illuminate\Support\Facades\Cache::forget('active_academic_year_global');
-            \Illuminate\Support\Facades\Cache::forget('all_academic_years_global');
+           Cache::forget('active_academic_year_global');
+           Cache::forget('all_academic_years_global');
         };
 
         static::saved($flush);
@@ -47,7 +48,7 @@ class AcademicYear extends Model
             return self::$activeArrayMemo;
         }
 
-        self::$activeArrayMemo = \Illuminate\Support\Facades\Cache::remember('active_academic_year_global', 3600, function () {
+        self::$activeArrayMemo =Cache::remember('active_academic_year_global', 3600, function () {
             $year = static::where('is_active', true)
                 ->first(['id', 'name', 'semester', 'is_active', 'is_enrollment_open', 'is_grading_open']);
 

@@ -24,6 +24,20 @@ class SchoolSetting extends Model
     ];
 
     /**
+     * Automatic Cache Clearing on Model Lifecycle
+     */
+    protected static function booted(): void
+    {
+        static::saved(function () {
+            static::clearCache();
+        });
+
+        static::deleted(function () {
+            static::clearCache();
+        });
+    }
+
+    /**
      * In-memory cache per HTTP request so multiple calls in the same request
      * do not even hit Redis/File cache more than once.
      */

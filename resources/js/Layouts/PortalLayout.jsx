@@ -20,6 +20,7 @@ import {
     Layers,
     Server,
     Building2,
+    BookOpen,
 } from "lucide-react";
 
 export default function PortalLayout({ children, title = "Dashboard" }) {
@@ -149,6 +150,11 @@ export default function PortalLayout({ children, title = "Dashboard" }) {
                                 name: "School Years",
                                 href: "/admin/academic-years",
                                 icon: Calendar,
+                            },
+                            {
+                                name: "Subjects & Curriculum",
+                                href: "/admin/subjects",
+                                icon: BookOpen,
                             },
                             {
                                 name: "Class Sectioning",

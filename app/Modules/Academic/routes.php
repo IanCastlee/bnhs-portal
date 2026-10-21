@@ -71,6 +71,12 @@ Route::middleware(['auth', 'role:ADMIN'])->prefix('admin')->name('admin.')->grou
     Route::patch('/academic-years/{academicYear}/grading', [\App\Modules\Academic\Controllers\AdminAcademicYearController::class, 'toggleGrading'])->name('academic-years.toggle-grading');
     Route::delete('/academic-years/{academicYear}', [\App\Modules\Academic\Controllers\AdminAcademicYearController::class, 'destroy'])->name('academic-years.destroy');
 
+    // 📚 Curriculum Subjects Management (Dynamic per Grade & Strand with Redis Cache)
+    Route::get('/subjects', [\App\Modules\Academic\Controllers\AdminSubjectController::class, 'index'])->name('subjects.index');
+    Route::post('/subjects', [\App\Modules\Academic\Controllers\AdminSubjectController::class, 'store'])->name('subjects.store');
+    Route::put('/subjects/{subject}', [\App\Modules\Academic\Controllers\AdminSubjectController::class, 'update'])->name('subjects.update');
+    Route::delete('/subjects/{subject}', [\App\Modules\Academic\Controllers\AdminSubjectController::class, 'destroy'])->name('subjects.destroy');
+
     // School Branding, Name & Logo Settings (Global Cached)
     Route::get('/settings', [\App\Modules\Academic\Controllers\AdminSchoolSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [\App\Modules\Academic\Controllers\AdminSchoolSettingController::class, 'update'])->name('settings.update');

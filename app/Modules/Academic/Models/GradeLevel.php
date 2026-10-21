@@ -13,6 +13,20 @@ class GradeLevel extends Model
         'category',
     ];
 
+    protected static function booted(): void
+    {
+        $flush = function () {
+            try {
+                \Illuminate\Support\Facades\Cache::tags(['curriculum'])->flush();
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Cache::forget('curriculum_grade_levels');
+            }
+        };
+
+        static::saved($flush);
+        static::deleted($flush);
+    }
+
     public function sections(): HasMany
     {
         return $this->hasMany(Section::class);

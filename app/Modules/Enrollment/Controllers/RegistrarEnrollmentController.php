@@ -28,7 +28,7 @@ use Illuminate\Http\RedirectResponse;
 class RegistrarEnrollmentController extends Controller
 {
     /**
-     *📋 List all applications in the Queue with High-Performance Cursor / Fast Pagination
+     * List all applications in the Queue with High-Performance Cursor / Fast Pagination
      */
     public function index(Request $request): Response
     {
@@ -160,7 +160,7 @@ class RegistrarEnrollmentController extends Controller
             $enrollments = $query->paginate(15)->withQueryString();
         }
 
-        // 🎯 Accurate Scoped Queue Metrics for the Registrar's partition & active School Year
+        //  Accurate Scoped Queue Metrics for the Registrar's partition & active School Year
         $countBaseQuery = Enrollment::query();
         if ($academicYearId) {
             $countBaseQuery->where('academic_year_id', $academicYearId);
