@@ -8,20 +8,11 @@ use App\Modules\Enrollment\Controllers\RegistrarSectioningController;
 use App\Modules\Enrollment\Controllers\SectionAdviserController;
 use App\Modules\Enrollment\Controllers\SectionDistributionController;
 use App\Modules\Enrollment\Controllers\SectionSubjectController;
-use App\Modules\Enrollment\Controllers\DocumentController;
 
-//  SECURE DOCUMENT ACCESS (Strict Data Privacy Authorization + Audit Log)
-Route::middleware(['auth', 'verified', 'throttle:60,1'])->group(function () {
-    Route::get('/documents/{enrollment}/{type}', [DocumentController::class, 'show'])->name('documents.show');
-});
-
-//  STUDENT ADMISSION & BEEF ACTIONS (Protected by auth, role:STUDENT, verified, throttle:admission)
+// STUDENT ADMISSION & BEEF ACTIONS (Protected by auth, role:STUDENT, verified, throttle:admission)
 Route::middleware(['auth', 'role:STUDENT', 'verified', 'throttle:admission'])->prefix('student/admission')->name('student.admission.')->group(function () {
     Route::post('/household', [AdmissionController::class, 'updateHousehold'])->name('household');
     Route::post('/re-enroll', [AdmissionController::class, 'confirmReEnroll'])->name('re_enroll');
-    Route::post('/upload', [AdmissionController::class, 'upload'])->name('upload');
-    Route::get('/cloudinary-signature', [AdmissionController::class, 'getCloudinarySignature'])->name('cloudinary.signature');
-    Route::post('/save-doc-record', [AdmissionController::class, 'saveDocRecord'])->name('save.doc.record');
 });
 
 //  REGISTRAR & ADMIN PORTAL ACCESS

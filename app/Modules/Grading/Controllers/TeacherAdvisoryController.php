@@ -44,15 +44,24 @@ class TeacherAdvisoryController extends Controller
         ->when($activeYear, fn ($q) => $q->where('academic_year_id', $activeYear->id))
         ->get();
 
-        // Build per-section subject grading progress for the Adviser
-        $sectionsData = $advisorySections->map(function ($section) use ($activeYear) {
-            $gradesBySubject = Grade::where('section_id', $section->id)
-                ->when($activeYear, fn ($q) => $q->where('academic_year_id', $activeYear->id))
-                ->get()
-                ->groupBy('subject_id');
+        // Pre-fetch all grades for all teacher's advisory sections in a SINGLE batch query (Eliminate N+1)
+        $sectionIds = $advisorySections->pluck('id')->all();
 
-            $subjects = $section->sectionSubjects->map(function ($secSub) use ($gradesBySubject, $section) {
-                $subjectGrades = $gradesBySubject->get($secSub->subject_id, collect());
+        $allGrades = empty($sectionIds) ? collect() : Grade::select([
+                'id', 'section_id', 'subject_id', 'teacher_id', 'status',
+                'q1', 'q2', 'q3', 'q4'
+            ])
+            ->whereIn('section_id', $sectionIds)
+            ->when($activeYear, fn ($q) => $q->where('academic_year_id', $activeYear->id))
+            ->get()
+            ->groupBy(['section_id', 'subject_id']);
+
+        // Build per-section subject grading progress for the Adviser
+        $sectionsData = $advisorySections->map(function ($section) use ($allGrades) {
+            $sectionGrades = $allGrades->get($section->id, collect());
+
+            $subjects = $section->sectionSubjects->map(function ($secSub) use ($sectionGrades, $section) {
+                $subjectGrades = $sectionGrades->get($secSub->subject_id, collect());
                 $firstGrade = $subjectGrades->first();
                 $statusVal = $firstGrade?->status instanceof GradeSubmissionStatus
                     ? $firstGrade->status->value

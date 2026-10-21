@@ -34,17 +34,23 @@ class EmailVerificationController extends Controller
         }
 
         $otpKey = "email_verify_otp:{$user->id}";
+        $attemptsKey = "email_verify_attempts:{$user->id}";
         $cooldownExpiresKey = "email_verify_cooldown_expires:{$user->id}";
 
-        // 2. Retrieve existing valid OTP or generate a new one
+        // 2. Retrieve existing valid OTP or atomically generate a new one
         $otp = Cache::get($otpKey);
         $isNewlyGenerated = false;
 
         if (!$otp) {
-            $otp = (string) random_int(100000, 999999);
-            Cache::put($otpKey, $otp, now()->addMinutes(10));
-            Cache::put("email_verify_attempts:{$user->id}", 0, now()->addMinutes(10));
-            $isNewlyGenerated = true;
+            $candidateOtp = (string) random_int(100000, 999999);
+            // Cache::add is atomic (SETNX in Redis). Returns true only if key didn't exist.
+            if (Cache::add($otpKey, $candidateOtp, now()->addMinutes(10))) {
+                $otp = $candidateOtp;
+                Cache::put($attemptsKey, 0, now()->addMinutes(10));
+                $isNewlyGenerated = true;
+            } else {
+                $otp = Cache::get($otpKey);
+            }
         }
 
         // 3. Generate HMAC signed temporary URL (valid for 30 minutes)
@@ -104,7 +110,6 @@ class EmailVerificationController extends Controller
         $attemptsKey = "email_verify_attempts:{$user->id}";
 
         $cachedOtp = Cache::get($otpKey);
-        $attempts = (int) Cache::get($attemptsKey, 0);
 
         // 🛑 Guard 1: Check if OTP exists / expired
         if (!$cachedOtp) {
@@ -113,8 +118,10 @@ class EmailVerificationController extends Controller
             ]);
         }
 
-        // 🛑 Guard 2: Brute-Force Rate Limiting (Max 5 attempts)
-        if ($attempts >= 5) {
+        // 🛑 Guard 2: Atomic attempt increment & brute-force check
+        $attempts = Cache::increment($attemptsKey);
+
+        if ($attempts > 5) {
             Cache::forget($otpKey);
             Cache::forget($attemptsKey);
 
@@ -125,8 +132,7 @@ class EmailVerificationController extends Controller
 
         // 🔒 Guard 3: Constant-time comparison to prevent timing attacks
         if (!hash_equals((string) $cachedOtp, (string) $request->input('otp'))) {
-            Cache::increment($attemptsKey);
-            $remaining = 5 - ($attempts + 1);
+            $remaining = max(0, 5 - $attempts);
 
             return back()->withErrors([
                 'otp' => "Invalid verification code. You have {$remaining} attempt(s) remaining.",
@@ -214,8 +220,9 @@ class EmailVerificationController extends Controller
         $cooldownKey = "email_verify_cooldown:{$user->id}";
         $cooldownExpiresKey = "email_verify_cooldown_expires:{$user->id}";
 
-        // 🛑 Guard: 60-second cooldown per user
-        if (Cache::has($cooldownKey)) {
+        // 🛑 Guard: Atomic 60-second cooldown per user (SETNX via Cache::add)
+        $acquired = Cache::add($cooldownKey, true, now()->addSeconds(60));
+        if (!$acquired) {
             $expiry = Cache::get($cooldownExpiresKey, now()->timestamp + 60);
             $secondsLeft = max(1, $expiry - now()->timestamp);
 
@@ -224,14 +231,12 @@ class EmailVerificationController extends Controller
             ]);
         }
 
-        // Generate fresh OTP & reset attempts
+        Cache::put($cooldownExpiresKey, now()->addSeconds(60)->timestamp, now()->addSeconds(60));
+
+        // Generate fresh OTP & reset attempts atomically
         $otp = (string) random_int(100000, 999999);
         Cache::put("email_verify_otp:{$user->id}", $otp, now()->addMinutes(10));
         Cache::put("email_verify_attempts:{$user->id}", 0, now()->addMinutes(10));
-
-        // Enforce 60-second cooldown
-        Cache::put($cooldownKey, true, now()->addSeconds(60));
-        Cache::put($cooldownExpiresKey, now()->addSeconds(60)->timestamp, now()->addSeconds(60));
 
         // Generate signed link
         $verificationUrl = URL::temporarySignedRoute(

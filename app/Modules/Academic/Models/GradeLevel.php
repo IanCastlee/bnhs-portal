@@ -27,6 +27,22 @@ class GradeLevel extends Model
         static::deleted($flush);
     }
 
+    public static function getCached(): array
+    {
+        $cacheDriver = \Illuminate\Support\Facades\Cache::supportsTags()
+            ? \Illuminate\Support\Facades\Cache::tags(['curriculum'])
+            : \Illuminate\Support\Facades\Cache::store();
+
+        try {
+            return $cacheDriver->remember('curriculum_grade_levels', now()->addHours(24), function () {
+                return static::orderBy('level')->get(['id', 'level', 'name', 'category'])->toArray();
+            });
+        } catch (\Throwable $e) {
+            $cacheDriver->forget('curriculum_grade_levels');
+            return static::orderBy('level')->get(['id', 'level', 'name', 'category'])->toArray();
+        }
+    }
+
     public function sections(): HasMany
     {
         return $this->hasMany(Section::class);

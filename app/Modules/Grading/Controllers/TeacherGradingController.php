@@ -197,6 +197,10 @@ class TeacherGradingController extends Controller
         }
 
         DB::transaction(function () use ($validated, $section, $subject, $activeYear, $teacherId) {
+            $now = now();
+            $records = [];
+            $studentIds = [];
+
             foreach ($validated['grades'] as $item) {
                 $q1 = isset($item['q1']) && $item['q1'] !== '' ? (float) $item['q1'] : null;
                 $q2 = isset($item['q2']) && $item['q2'] !== '' ? (float) $item['q2'] : null;
@@ -206,27 +210,36 @@ class TeacherGradingController extends Controller
                 $finalGrade = DepEdGradingService::computeFinalGrade($q1, $q2, $q3, $q4);
                 $remarks = DepEdGradingService::getRemarks($finalGrade);
 
-                Grade::updateOrCreate(
-                    [
-                        'academic_year_id' => $activeYear->id,
-                        'section_id'       => $section->id,
-                        'subject_id'       => $subject->id,
-                        'student_id'       => $item['student_id'],
-                    ],
-                    [
-                        'teacher_id'       => $teacherId,
-                        'q1'               => $q1,
-                        'q2'               => $q2,
-                        'q3'               => $q3,
-                        'q4'               => $q4,
-                        'final_grade'      => $finalGrade,
-                        'remarks'          => $remarks,
-                        'status'           => GradeSubmissionStatus::DRAFT,
-                        'updated_at'       => now(),
-                    ]
-                );
+                $records[] = [
+                    'academic_year_id' => $activeYear->id,
+                    'section_id'       => $section->id,
+                    'subject_id'       => $subject->id,
+                    'student_id'       => $item['student_id'],
+                    'teacher_id'       => $teacherId,
+                    'q1'               => $q1,
+                    'q2'               => $q2,
+                    'q3'               => $q3,
+                    'q4'               => $q4,
+                    'final_grade'      => $finalGrade,
+                    'remarks'          => $remarks,
+                    'status'           => GradeSubmissionStatus::DRAFT->value,
+                    'created_at'       => $now,
+                    'updated_at'       => $now,
+                ];
 
-                Cache::forget("student_grades_{$item['student_id']}");
+                $studentIds[] = $item['student_id'];
+            }
+
+            if (!empty($records)) {
+                Grade::upsert(
+                    $records,
+                    ['academic_year_id', 'section_id', 'subject_id', 'student_id'],
+                    ['teacher_id', 'q1', 'q2', 'q3', 'q4', 'final_grade', 'remarks', 'status', 'updated_at']
+                );
+            }
+
+            foreach ($studentIds as $sId) {
+                Cache::forget("student_grades_{$sId}");
             }
         });
 
@@ -260,8 +273,13 @@ class TeacherGradingController extends Controller
         }
 
         DB::transaction(function () use ($validated, $section, $subject, $activeYear, $teacherId, $targetStatus) {
-            // If Subject Teacher passed current rows while submitting to Adviser, upsert them first
+            $now = now();
+
+            // If Subject Teacher passed current rows while submitting to Adviser, batch upsert them first (1 single query)
             if ($targetStatus === 'SUBMITTED_TO_ADVISER' && !empty($validated['grades'])) {
+                $records = [];
+                $studentIds = [];
+
                 foreach ($validated['grades'] as $item) {
                     $q1 = isset($item['q1']) && $item['q1'] !== '' ? (float) $item['q1'] : null;
                     $q2 = isset($item['q2']) && $item['q2'] !== '' ? (float) $item['q2'] : null;
@@ -271,45 +289,63 @@ class TeacherGradingController extends Controller
                     $finalGrade = DepEdGradingService::computeFinalGrade($q1, $q2, $q3, $q4);
                     $remarks = DepEdGradingService::getRemarks($finalGrade);
 
-                    Grade::updateOrCreate(
-                        [
-                            'academic_year_id' => $activeYear->id,
-                            'section_id'       => $section->id,
-                            'subject_id'       => $subject->id,
-                            'student_id'       => $item['student_id'],
-                        ],
-                        [
-                            'teacher_id'  => $teacherId,
-                            'q1'          => $q1,
-                            'q2'          => $q2,
-                            'q3'          => $q3,
-                            'q4'          => $q4,
-                            'final_grade' => $finalGrade,
-                            'remarks'     => $remarks,
-                            'status'      => $targetStatus,
-                            'updated_at'  => now(),
-                        ]
+                    $records[] = [
+                        'academic_year_id' => $activeYear->id,
+                        'section_id'       => $section->id,
+                        'subject_id'       => $subject->id,
+                        'student_id'       => $item['student_id'],
+                        'teacher_id'       => $teacherId,
+                        'q1'               => $q1,
+                        'q2'               => $q2,
+                        'q3'               => $q3,
+                        'q4'               => $q4,
+                        'final_grade'      => $finalGrade,
+                        'remarks'          => $remarks,
+                        'status'           => $targetStatus,
+                        'created_at'       => $now,
+                        'updated_at'       => $now,
+                    ];
+
+                    $studentIds[] = $item['student_id'];
+                }
+
+                if (!empty($records)) {
+                    Grade::upsert(
+                        $records,
+                        ['academic_year_id', 'section_id', 'subject_id', 'student_id'],
+                        ['teacher_id', 'q1', 'q2', 'q3', 'q4', 'final_grade', 'remarks', 'status', 'updated_at']
                     );
                 }
+
+                foreach ($studentIds as $sId) {
+                    Cache::forget("student_grades_{$sId}");
+                }
             } else {
-                // Ensure all enrolled students have a grade row before updating status
+                // Ensure all enrolled students have a grade row before updating status (batch upsert placeholders)
                 $enrolledStudentIds = Enrollment::where('section_id', $section->id)
                     ->where('status', EnrollmentStatus::APPROVED)
                     ->pluck('student_id');
 
+                $placeholders = [];
                 foreach ($enrolledStudentIds as $studentId) {
-                    Grade::firstOrCreate(
-                        [
-                            'academic_year_id' => $activeYear->id,
-                            'section_id'       => $section->id,
-                            'subject_id'       => $subject->id,
-                            'student_id'       => $studentId,
-                        ],
-                        [
-                            'teacher_id' => $teacherId,
-                            'remarks'    => 'PENDING',
-                            'status'     => $targetStatus,
-                        ]
+                    $placeholders[] = [
+                        'academic_year_id' => $activeYear->id,
+                        'section_id'       => $section->id,
+                        'subject_id'       => $subject->id,
+                        'student_id'       => $studentId,
+                        'teacher_id'       => $teacherId,
+                        'remarks'          => 'PENDING',
+                        'status'           => $targetStatus,
+                        'created_at'       => $now,
+                        'updated_at'       => $now,
+                    ];
+                }
+
+                if (!empty($placeholders)) {
+                    Grade::upsert(
+                        $placeholders,
+                        ['academic_year_id', 'section_id', 'subject_id', 'student_id'],
+                        ['status', 'updated_at']
                     );
                 }
 
@@ -318,7 +354,7 @@ class TeacherGradingController extends Controller
                     ->where('academic_year_id', $activeYear->id)
                     ->update([
                         'status'     => $targetStatus,
-                        'updated_at' => now(),
+                        'updated_at' => $now,
                     ]);
             }
         });

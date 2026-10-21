@@ -28,6 +28,9 @@ export default function SubjectsIndex({
     stats = {},
     filters = {},
 }) {
+    const safeGradeLevels = Array.isArray(gradeLevels) ? gradeLevels : Object.values(gradeLevels || {});
+    const safeStrands = Array.isArray(strands) ? strands : Object.values(strands || {});
+
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -39,7 +42,7 @@ export default function SubjectsIndex({
 
     // Create form state
     const createForm = useForm({
-        grade_level_id: gradeLevels[0]?.id || "",
+        grade_level_id: safeGradeLevels[0]?.id || "",
         strand_id: "",
         code: "",
         name: "",
@@ -141,7 +144,7 @@ export default function SubjectsIndex({
 
     // Helper to check if selected grade level in form is Senior High School
     const isSHSGrade = (gradeId) => {
-        const found = gradeLevels.find((g) => String(g.id) === String(gradeId));
+        const found = safeGradeLevels.find((g) => String(g.id) === String(gradeId));
         return found?.category === "SHS" || (found?.level && found.level >= 11);
     };
 
@@ -179,7 +182,7 @@ export default function SubjectsIndex({
                                 onClick={() => {
                                     createForm.clearErrors();
                                     createForm.reset({
-                                        grade_level_id: selectedGradeId || gradeLevels[0]?.id || "",
+                                        grade_level_id: selectedGradeId || safeGradeLevels[0]?.id || "",
                                         strand_id: "",
                                         code: "",
                                         name: "",
@@ -252,7 +255,7 @@ export default function SubjectsIndex({
                                 className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600"
                             >
                                 <option value="">All Grade Levels (7 - 12)</option>
-                                {gradeLevels.map((lvl) => (
+                                {safeGradeLevels.map((lvl) => (
                                     <option key={lvl.id} value={lvl.id}>
                                         {lvl.name} ({lvl.category})
                                     </option>
@@ -274,7 +277,7 @@ export default function SubjectsIndex({
                                 className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600"
                             >
                                 <option value="">All Strands / General</option>
-                                {strands.map((st) => (
+                                {safeStrands.map((st) => (
                                     <option key={st.id} value={st.id}>
                                         {st.code} - {st.name}
                                     </option>
@@ -462,7 +465,7 @@ export default function SubjectsIndex({
                                             className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800"
                                             required
                                         >
-                                            {gradeLevels.map((lvl) => (
+                                            {safeGradeLevels.map((lvl) => (
                                                 <option key={lvl.id} value={lvl.id}>
                                                     {lvl.name} ({lvl.category})
                                                 </option>
@@ -484,7 +487,7 @@ export default function SubjectsIndex({
                                             className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 disabled:bg-slate-100 disabled:text-slate-400"
                                         >
                                             <option value="">General / Core Subject</option>
-                                            {strands.map((st) => (
+                                            {safeStrands.map((st) => (
                                                 <option key={st.id} value={st.id}>
                                                     {st.code} ({st.name})
                                                 </option>
@@ -605,7 +608,7 @@ export default function SubjectsIndex({
                                             className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800"
                                             required
                                         >
-                                            {gradeLevels.map((lvl) => (
+                                            {safeGradeLevels.map((lvl) => (
                                                 <option key={lvl.id} value={lvl.id}>
                                                     {lvl.name} ({lvl.category})
                                                 </option>
@@ -627,7 +630,7 @@ export default function SubjectsIndex({
                                             className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-800 disabled:bg-slate-100 disabled:text-slate-400"
                                         >
                                             <option value="">General / Core Subject</option>
-                                            {strands.map((st) => (
+                                            {safeStrands.map((st) => (
                                                 <option key={st.id} value={st.id}>
                                                     {st.code} ({st.name})
                                                 </option>

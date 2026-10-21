@@ -21,15 +21,8 @@ class AdminSubjectController extends Controller
      */
     public function index(Request $request): Response
     {
-        $cacheDriver = Cache::supportsTags() ? Cache::tags(['curriculum']) : Cache::store();
-
-        $gradeLevels = $cacheDriver->remember('curriculum_grade_levels', now()->addHours(24), function () {
-            return GradeLevel::orderBy('level')->get();
-        });
-
-        $strands = $cacheDriver->remember('curriculum_strands', now()->addHours(24), function () {
-            return Strand::where('is_active', true)->orderBy('code')->get();
-        });
+        $gradeLevels = GradeLevel::getCached();
+        $strands = Strand::getCached();
 
         $selectedGradeLevelId = $request->query('grade_level_id');
         $selectedStrandId = $request->query('strand_id');

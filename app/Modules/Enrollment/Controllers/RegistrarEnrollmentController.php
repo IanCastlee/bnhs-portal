@@ -385,8 +385,8 @@ class RegistrarEnrollmentController extends Controller
         DB::transaction(function () use ($enrollment, $validated, &$alreadyHandled) {
             $locked = Enrollment::where('id', $enrollment->id)->lockForUpdate()->firstOrFail();
 
-            // Guard against both double-approval and double-rejection concurrency
-            if (in_array($locked->status, [EnrollmentStatus::APPROVED, EnrollmentStatus::REJECTED], true)) {
+            // Guard against rejecting an already approved application
+            if ($locked->status === EnrollmentStatus::APPROVED) {
                 $alreadyHandled = true;
                 return;
             }

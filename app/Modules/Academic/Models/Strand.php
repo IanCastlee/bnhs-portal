@@ -33,6 +33,22 @@ class Strand extends Model
         static::deleted($flush);
     }
 
+    public static function getCached(): array
+    {
+        $cacheDriver = \Illuminate\Support\Facades\Cache::supportsTags()
+            ? \Illuminate\Support\Facades\Cache::tags(['curriculum'])
+            : \Illuminate\Support\Facades\Cache::store();
+
+        try {
+            return $cacheDriver->remember('curriculum_strands', now()->addHours(24), function () {
+                return static::where('is_active', true)->orderBy('code')->get(['id', 'code', 'name', 'track'])->toArray();
+            });
+        } catch (\Throwable $e) {
+            $cacheDriver->forget('curriculum_strands');
+            return static::where('is_active', true)->orderBy('code')->get(['id', 'code', 'name', 'track'])->toArray();
+        }
+    }
+
     public function sections(): HasMany
     {
         return $this->hasMany(Section::class);

@@ -125,13 +125,21 @@ export default function Enrollments({
     const openReviewModal = (enrollment) => {
         setSelectedEnrollment(enrollment);
         setSelectedSectionId(enrollment.section_id || "");
-        setApprovalRemarks(enrollment.remarks || "");
         setOnsiteGuardianName(enrollment.guardian_name || "");
         setOnsiteGuardianContact(enrollment.guardian_contact || "");
         setOnsiteAddress(enrollment.address || "");
         setShowOnsiteEncoder(false);
-        setRejectRemarks("");
-        setIsRejecting(false);
+
+        if (enrollment.status === "REJECTED") {
+            // Kung binalik/rejected ang record, buksan agad sa Return/Reject form
+            setRejectRemarks(enrollment.remarks || "");
+            setApprovalRemarks("");
+            setIsRejecting(true);
+        } else {
+            setApprovalRemarks(enrollment.remarks || "");
+            setRejectRemarks("");
+            setIsRejecting(false);
+        }
     };
 
     const openDocViewer = (doc) => {
@@ -277,47 +285,47 @@ export default function Enrollments({
                 </div>
 
                 {/* 📊 Status Filter Tabs + Right-Aligned Dropdown & Compact Search Bar */}
-                <div className="bg-white px-3 py-2 rounded-2xl border border-slate-200/80 shadow-xs">
+                <div className="bg-white px-3 py-2.5 rounded-2xl border border-slate-200/80 shadow-xs">
                     <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
                         {/* Left: Status Tabs */}
-                        <div className="flex flex-wrap lg:flex-nowrap items-center gap-1.5">
+                        <div className="flex flex-wrap lg:flex-nowrap items-center gap-2.5 pt-2 pb-0.5">
                             <button
                                 onClick={() =>
                                     handleStatusFilter("PENDING_COMPLETE")
                                 }
-                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                                className={`relative h-8 px-3 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                                     selectedStatus === "PENDING_COMPLETE"
                                         ? "bg-emerald-700 text-white shadow-xs"
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
-                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                                <span>
-                                    Ready for Review (
-                                    {counts.pending_complete || 0})
+                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                    {counts.pending_complete || 0}
                                 </span>
+                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                <span>Ready for Review</span>
                             </button>
 
                             <button
                                 onClick={() =>
                                     handleStatusFilter("PENDING_INCOMPLETE")
                                 }
-                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                                className={`relative h-8 px-3 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                                     selectedStatus === "PENDING_INCOMPLETE"
                                         ? "bg-amber-600 text-white shadow-xs"
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
-                                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                                <span>
-                                    Incomplete Form (
-                                    {counts.pending_incomplete || 0})
+                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                    {counts.pending_incomplete || 0}
                                 </span>
+                                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                <span>Incomplete Form</span>
                             </button>
 
                             <button
                                 onClick={() => handleStatusFilter("APPROVED")}
-                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                                className={`relative h-8 px-3 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                                     selectedStatus === "APPROVED" ||
                                     selectedStatus === "APPROVED_COMPLETE" ||
                                     selectedStatus === "APPROVED_INCOMPLETE"
@@ -325,32 +333,41 @@ export default function Enrollments({
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
+                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                    {counts.approved || 0}
+                                </span>
                                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                                <span>Approved ({counts.approved || 0})</span>
+                                <span>Approved</span>
                             </button>
 
                             <button
                                 onClick={() => handleStatusFilter("REJECTED")}
-                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                                className={`relative h-8 px-3 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                                     selectedStatus === "REJECTED"
                                         ? "bg-rose-600 text-white shadow-xs"
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
+                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                    {counts.rejected || 0}
+                                </span>
                                 <XCircle className="w-3.5 h-3.5 shrink-0" />
-                                <span>Returned ({counts.rejected || 0})</span>
+                                <span>Returned</span>
                             </button>
 
                             <button
                                 onClick={() => handleStatusFilter("ALL")}
-                                className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                                className={`relative h-8 px-3 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                                     selectedStatus === "ALL"
                                         ? "bg-slate-900 text-white shadow-xs"
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
+                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                    {counts.total || 0}
+                                </span>
                                 <Layers className="w-3.5 h-3.5 shrink-0" />
-                                <span>All Records ({counts.total || 0})</span>
+                                <span>All Records</span>
                             </button>
                         </div>
 
@@ -1299,9 +1316,11 @@ export default function Enrollments({
                                             onClick={() =>
                                                 setIsRejecting(false)
                                             }
-                                            className="text-xs font-bold text-slate-600 hover:text-slate-800 cursor-pointer"
+                                            className="text-xs font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer underline"
                                         >
-                                            Cancel Return
+                                            {selectedEnrollment?.status === "REJECTED"
+                                                ? "Switch to Approval Form"
+                                                : "Cancel Return"}
                                         </button>
 
                                         <Button
@@ -1315,6 +1334,8 @@ export default function Enrollments({
                                         >
                                             {isSubmitting
                                                 ? "Processing..."
+                                                : selectedEnrollment?.status === "REJECTED"
+                                                ? "Update Return Remarks"
                                                 : "Confirm Return"}
                                         </Button>
                                     </div>
