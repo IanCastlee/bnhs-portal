@@ -34,6 +34,7 @@ import {
     AlertTriangle,
     Edit3,
 } from "lucide-react";
+import { toast } from "@/Context/ToastContext";
 
 export default function Enrollments({
     enrollments,
@@ -195,7 +196,7 @@ export default function Enrollments({
         ).trim();
 
         if (!effectiveGuardian || !effectiveAddress) {
-            alert(
+            toast.warning(
                 "Bawal i-approve ang application: Kinakailangang may Parent/Guardian name at Permanent Address alinsunod sa DepEd Basic Education Enrollment Form (BEEF).",
             );
             return;
@@ -230,7 +231,7 @@ export default function Enrollments({
     const handleReject = (e) => {
         e.preventDefault();
         if (!rejectRemarks.trim()) {
-            alert(
+            toast.warning(
                 "Please provide remarks for returning / rejecting this application.",
             );
             return;
@@ -299,9 +300,11 @@ export default function Enrollments({
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
-                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
-                                    {counts.pending_complete || 0}
-                                </span>
+                                {Number(counts.pending_complete) > 0 && (
+                                    <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                        {counts.pending_complete}
+                                    </span>
+                                )}
                                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                                 <span>Ready for Review</span>
                             </button>
@@ -316,9 +319,11 @@ export default function Enrollments({
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
-                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
-                                    {counts.pending_incomplete || 0}
-                                </span>
+                                {Number(counts.pending_incomplete) > 0 && (
+                                    <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                        {counts.pending_incomplete}
+                                    </span>
+                                )}
                                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                                 <span>Incomplete Form</span>
                             </button>
@@ -333,9 +338,11 @@ export default function Enrollments({
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
-                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
-                                    {counts.approved || 0}
-                                </span>
+                                {Number(counts.approved) > 0 && (
+                                    <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                        {counts.approved}
+                                    </span>
+                                )}
                                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                                 <span>Approved</span>
                             </button>
@@ -348,9 +355,11 @@ export default function Enrollments({
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
-                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
-                                    {counts.rejected || 0}
-                                </span>
+                                {Number(counts.rejected) > 0 && (
+                                    <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                        {counts.rejected}
+                                    </span>
+                                )}
                                 <XCircle className="w-3.5 h-3.5 shrink-0" />
                                 <span>Returned</span>
                             </button>
@@ -363,9 +372,11 @@ export default function Enrollments({
                                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                 }`}
                             >
-                                <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
-                                    {counts.total || 0}
-                                </span>
+                                {Number(counts.total) > 0 && (
+                                    <span className="absolute -top-2 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold text-white bg-red-600 border-2 border-white shadow-xs pointer-events-none">
+                                        {counts.total}
+                                    </span>
+                                )}
                                 <Layers className="w-3.5 h-3.5 shrink-0" />
                                 <span>All Records</span>
                             </button>

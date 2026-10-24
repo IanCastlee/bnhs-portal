@@ -23,8 +23,10 @@ import {
     Filter,
     Trash2,
     BookOpen,
+    Pencil,
 } from "lucide-react";
 import ManageSectionSubjectsModal from "@/Components/Organisms/Registrar/ManageSectionSubjectsModal";
+import { toast } from "@/Context/ToastContext";
 
 export default function Sectioning({
     assignedGradeLevels = [],
@@ -47,6 +49,48 @@ export default function Sectioning({
     const [newSectionCapacity, setNewSectionCapacity] = useState(45);
     const [newSectionAdviserId, setNewSectionAdviserId] = useState("");
     const [isCreatingSection, setIsCreatingSection] = useState(false);
+
+    // Edit Section Form State
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingSection, setEditingSection] = useState(null);
+    const [editSectionName, setEditSectionName] = useState("");
+    const [editSectionCapacity, setEditSectionCapacity] = useState(45);
+    const [editSectionAdviserId, setEditSectionAdviserId] = useState("");
+    const [isUpdatingSection, setIsUpdatingSection] = useState(false);
+
+    const openEditModal = (section) => {
+        setEditingSection(section);
+        setEditSectionName(section.name || "");
+        setEditSectionCapacity(section.capacity || 45);
+        setEditSectionAdviserId(
+            section.adviser_id ? String(section.adviser_id) : ""
+        );
+        setShowEditModal(true);
+    };
+
+    const handleUpdateSection = (e) => {
+        e.preventDefault();
+        if (!editSectionName.trim() || !editingSection) return;
+
+        setIsUpdatingSection(true);
+        router.put(
+            `/registrar/sectioning/${editingSection.id}`,
+            {
+                name: editSectionName.trim(),
+                capacity: parseInt(editSectionCapacity, 10),
+                adviser_id: editSectionAdviserId || null,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setShowEditModal(false);
+                    setIsUpdatingSection(false);
+                    setEditingSection(null);
+                },
+                onError: () => setIsUpdatingSection(false),
+            }
+        );
+    };
 
     // Adviser Modal State
     const [showAdviserModal, setShowAdviserModal] = useState(false);
@@ -152,7 +196,7 @@ export default function Sectioning({
     const handleAutoDistribute = (e) => {
         e.preventDefault();
         if (selectedSectionIds.length < 2) {
-            alert("Pumili ng hindi bababa sa dalawang (2) sections para sa auto-distribution.");
+            toast.warning("Pumili ng hindi bababa sa dalawang (2) sections para sa auto-distribution.");
             return;
         }
 
@@ -472,6 +516,15 @@ export default function Sectioning({
 
                                                     <button
                                                         type="button"
+                                                        onClick={() => openEditModal(section)}
+                                                        className="p-1 rounded-lg text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition cursor-pointer"
+                                                        title={`I-edit ang mga detalye ng Section ${section.name}`}
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
                                                         onClick={() => handleDeleteSection(section)}
                                                         className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                                                         title={`Tanggalin ang Section ${section.name}`}
@@ -667,17 +720,20 @@ export default function Sectioning({
 
                             <div>
                                 <label className="block font-bold text-slate-700 mb-1">
-                                    Maximum Capacity (DepEd Standard: 40-45)
+                                    Maximum Capacity
                                 </label>
                                 <Input
                                     type="number"
-                                    min="10"
-                                    max="60"
+                                    min="1"
+                                    max="150"
                                     value={newSectionCapacity}
                                     onChange={(e) => setNewSectionCapacity(Number(e.target.value))}
                                     required
                                     className="h-10 text-xs"
                                 />
+                                <p className="text-[11px] text-slate-400 mt-1">
+                                    DepEd Standard: 40-45 (Maaaring lumagpas batay sa pangangailangan ng paaralan).
+                                </p>
                             </div>
 
                             <div>
@@ -722,6 +778,113 @@ export default function Sectioning({
                                     className="bg-emerald-700 text-white font-bold"
                                 >
                                     {isCreatingSection ? "Gumagawa..." : "Lumikha ng Section"}
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal: Edit Section Details */}
+            {showEditModal && editingSection && (
+                <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+                    <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100">
+                        <div className="p-5 bg-gradient-to-r from-[#07241c] via-[#0f4c3a] to-[#0d5c43] text-white flex items-center justify-between shadow-xs">
+                            <h3 className="font-black text-white text-base flex items-center gap-2">
+                                <Pencil className="w-5 h-5 text-emerald-300" />
+                                <span>I-update ang Section ({editingSection.name})</span>
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowEditModal(false);
+                                    setEditingSection(null);
+                                }}
+                                className="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleUpdateSection} className="p-6 space-y-4 text-xs">
+                            <div>
+                                <label className="block font-bold text-slate-700 mb-1">
+                                    Pangalan ng Section
+                                </label>
+                                <Input
+                                    value={editSectionName}
+                                    onChange={(e) => setEditSectionName(e.target.value)}
+                                    placeholder="hal. Rizal, Diamond, Bonifacio"
+                                    required
+                                    className="h-10 text-xs"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block font-bold text-slate-700 mb-1">
+                                    Maximum Capacity
+                                </label>
+                                <Input
+                                    type="number"
+                                    min={editingSection.enrolled_count || 1}
+                                    max="150"
+                                    value={editSectionCapacity}
+                                    onChange={(e) => setEditSectionCapacity(Number(e.target.value))}
+                                    required
+                                    className="h-10 text-xs"
+                                />
+                                <p className="text-[11px] text-slate-400 mt-1">
+                                    Kasalukuyang may {editingSection.enrolled_count || 0} naka-enroll. Maaaring lumagpas sa 45 batay sa pangangailangan.
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block font-bold text-slate-700 mb-1">
+                                    Class Adviser (Opsyonal)
+                                </label>
+                                <select
+                                    value={editSectionAdviserId}
+                                    onChange={(e) => setEditSectionAdviserId(e.target.value)}
+                                    className="w-full h-10 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                >
+                                    <option value="">-- Walang Adviser Muna --</option>
+                                    {teachers.map((teacher) => (
+                                        <option key={teacher.id} value={teacher.id}>
+                                            {teacher.name}
+                                            {teacher.employee_id ? ` (${teacher.employee_id})` : ""}
+                                            {teacher.current_advisory
+                                                ? (teacher.current_advisory.section_id === editingSection.id
+                                                    ? " [Kasalukuyang Adviser dito]"
+                                                    : ` [May hawak: ${teacher.current_advisory.grade_name} - ${teacher.current_advisory.section_name}]`)
+                                                : " [Available]"}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[11px] text-slate-400 mt-1">
+                                    Maaaring baguhin ang adviser anumang oras.
+                                </p>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setShowEditModal(false);
+                                        setEditingSection(null);
+                                    }}
+                                >
+                                    Kanselahin
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    size="sm"
+                                    disabled={isUpdatingSection}
+                                    className="gap-1.5 bg-emerald-700 text-white font-bold"
+                                >
+                                    {isUpdatingSection ? "Ina-update..." : "I-save ang Pagbabago"}
                                 </Button>
                             </div>
                         </form>

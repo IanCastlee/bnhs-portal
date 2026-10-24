@@ -357,7 +357,7 @@ class RegistrarEnrollmentController extends Controller
         // Dispatch asynchronous ledger generation
         ProcessEnrollmentApprovalJob::dispatch($freshEnrollment, $reviewerId);
 
-        // Dispatch Queued Email & Database Notification to Student
+        // Dispatch In-App Database Notification to Student (Bell Icon Feed)
         $student = $freshEnrollment->student;
         if ($student) {
             $student->notify(new \App\Notifications\EnrollmentApprovedNotification($freshEnrollment));
@@ -419,7 +419,7 @@ class RegistrarEnrollmentController extends Controller
             return back()->withErrors(['status' => 'Hindi na maaaring i-reject ang application na naproseso na.']);
         }
 
-        // Dispatch Queued Email & Database Notification to Student
+        // Dispatch In-App Database Notification to Student (Bell Icon Feed)
         $freshEnrollment = $enrollment->fresh(['gradeLevel', 'student']);
         $student = $freshEnrollment->student;
         if ($student) {

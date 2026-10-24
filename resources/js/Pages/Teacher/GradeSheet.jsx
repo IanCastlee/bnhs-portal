@@ -3,6 +3,7 @@ import { Head, Link, router } from "@inertiajs/react";
 import PortalLayout from "@/Layouts/PortalLayout";
 import Card from "@/Components/Atoms/Common/Card";
 import Button from "@/Components/Atoms/Common/Button";
+import { toast } from "@/Context/ToastContext";
 import {
     FileSpreadsheet,
     ArrowLeft,
@@ -143,10 +144,12 @@ export default function GradeSheet({
             const data = await response.json();
 
             if (!response.ok) {
+                const errMsg = data.message || "Failed to parse the uploaded Excel file.";
                 setImportNotice({
                     type: "error",
-                    text: data.message || "Failed to parse the uploaded Excel file.",
+                    text: errMsg,
                 });
+                toast.error(errMsg);
                 return;
             }
 
@@ -172,15 +175,19 @@ export default function GradeSheet({
                 })
             );
 
+            const successText = `Successfully imported and converted grades for ${data.matchedCount} out of ${data.totalEnrolled} students from "${file.name}". Review the numbers below and click Save Draft or Submit to Adviser.`;
             setImportNotice({
                 type: "success",
-                text: `Successfully imported and converted grades for ${data.matchedCount} out of ${data.totalEnrolled} students from "${file.name}". Review the numbers below and click Save Draft or Submit to Adviser.`,
+                text: successText,
             });
+            toast.success(`Na-import na ang marka ng ${data.matchedCount} mag-aaral mula sa "${file.name}"!`);
         } catch (err) {
+            const fallbackErr = "An unexpected error occurred while reading the Excel file.";
             setImportNotice({
                 type: "error",
-                text: "An unexpected error occurred while reading the Excel file.",
+                text: fallbackErr,
             });
+            toast.error(fallbackErr);
         } finally {
             setIsImporting(false);
             if (fileInputRef.current) {

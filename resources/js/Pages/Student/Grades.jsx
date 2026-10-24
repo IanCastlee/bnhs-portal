@@ -97,16 +97,16 @@ export default function Grades({
                         </div>
 
                         {/* GWA Badge Summary */}
-                        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3 sm:px-4 sm:py-3 rounded-2xl border border-white/20 shrink-0 self-start sm:self-auto">
+                        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3.5 sm:px-4 sm:py-3 rounded-2xl border border-white/20 w-full sm:w-auto shrink-0 shadow-inner">
                             <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-400 text-slate-950 shrink-0">
-                                <Award className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <Award className="w-5 h-5" />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 <p className="text-[9px] sm:text-[10px] uppercase font-bold text-emerald-200 tracking-wider">
                                     General Weighted Average
                                 </p>
-                                <div className="flex items-baseline gap-1.5">
-                                    <span className="text-xl sm:text-2xl font-black text-white">
+                                <div className="flex items-baseline gap-1.5 flex-wrap">
+                                    <span className="text-xl sm:text-2xl font-black text-white font-mono">
                                         {currentGwa ? currentGwa.toFixed(2) : "--"}
                                     </span>
                                     <span className="text-[11px] sm:text-xs font-bold text-emerald-300">
@@ -122,12 +122,13 @@ export default function Grades({
                 <div className="relative z-20 -mt-6 sm:mt-0 -mx-2.5 sm:mx-0 px-3.5 pt-5 pb-2 sm:p-0 bg-[#f4f7fa] sm:bg-transparent rounded-t-3xl sm:rounded-none shadow-[0_-6px_20px_rgba(0,0,0,0.08)] sm:shadow-none space-y-4 sm:space-y-6">
                     {/* Quarter Filter & SF9 Action Bar */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
-                        <div className="flex items-center gap-1.5 overflow-x-auto">
+                        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
                             {["all", "Q1", "Q2", "Q3", "Q4"].map((q) => (
                                 <button
                                     key={q}
+                                    type="button"
                                     onClick={() => setSelectedQuarter(q)}
-                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                                         selectedQuarter === q
                                             ? "bg-emerald-600 text-white shadow-xs"
                                             : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -143,15 +144,132 @@ export default function Grades({
                             variant="outline"
                             size="sm"
                             onClick={() => window.print()}
-                            className="text-xs"
+                            className="text-xs w-full sm:w-auto flex items-center justify-center font-bold"
                         >
-                            <Printer className="w-4 h-4 mr-1.5" />
+                            <Printer className="w-4 h-4 mr-1.5 text-slate-600" />
                             <span>Print Official DepEd SF9</span>
                         </Button>
                     </div>
 
-                    {/* 📋 Official DepEd Form 138 / SF9 Grade Table */}
-                    <Card className="rounded-2xl border border-slate-200/80 p-0 overflow-hidden bg-white shadow-xs">
+                    {/* 📱 MOBILE VIEW: Native-Style Subject Grade Cards (Visible on mobile, hidden on desktop and print) */}
+                    <div className="space-y-3 md:hidden print:hidden">
+                        {displayGrades.map((g, idx) => {
+                            const isPassed = g.remarks === "PASSED";
+                            const isFailed = g.remarks === "FAILED";
+
+                            return (
+                                <div
+                                    key={idx}
+                                    className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs space-y-3 transition-all hover:border-emerald-300"
+                                >
+                                    {/* Header: Subject Name, Code & Remarks Badge */}
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                                                    {g.subject_code}
+                                                </span>
+                                                {g.teacher_name && (
+                                                    <span className="text-[10px] text-slate-400 font-medium truncate">
+                                                        &bull; {g.teacher_name}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <h4 className="font-black text-slate-900 text-sm mt-1 leading-snug">
+                                                {g.subject_name}
+                                            </h4>
+                                        </div>
+
+                                        {/* Remarks Pill */}
+                                        <div className="shrink-0">
+                                            {isPassed ? (
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
+                                                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                                    <span>PASSED</span>
+                                                </span>
+                                            ) : isFailed ? (
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-200 shadow-2xs">
+                                                    <span>FAILED</span>
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                                                    Ongoing
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* 4 Quarters Score Strip */}
+                                    <div className="grid grid-cols-4 gap-1.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                                        {[
+                                            { label: "Q1", val: g.q1, key: "Q1" },
+                                            { label: "Q2", val: g.q2, key: "Q2" },
+                                            { label: "Q3", val: g.q3, key: "Q3" },
+                                            { label: "Q4", val: g.q4, key: "Q4" },
+                                        ].map((qItem) => {
+                                            const isCurrentActiveQuarter = selectedQuarter === qItem.key;
+                                            const hasScore = qItem.val !== null && qItem.val !== undefined && qItem.val !== "";
+                                            const scoreNum = hasScore ? Number(qItem.val) : null;
+                                            const isScorePassing = scoreNum !== null && scoreNum >= 75;
+
+                                            return (
+                                                <div
+                                                    key={qItem.label}
+                                                    className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all ${
+                                                        isCurrentActiveQuarter
+                                                            ? "bg-emerald-600 text-white shadow-xs font-black ring-2 ring-emerald-500/20"
+                                                            : "bg-white border border-slate-200/70"
+                                                    }`}
+                                                >
+                                                    <span
+                                                        className={`text-[9px] font-bold uppercase tracking-wider ${
+                                                            isCurrentActiveQuarter ? "text-emerald-100" : "text-slate-400"
+                                                        }`}
+                                                    >
+                                                        {qItem.label}
+                                                    </span>
+                                                    <span
+                                                        className={`text-xs sm:text-sm font-mono mt-0.5 ${
+                                                            isCurrentActiveQuarter
+                                                                ? "text-white font-black"
+                                                                : hasScore
+                                                                ? isScorePassing
+                                                                    ? "text-slate-900 font-bold"
+                                                                    : "text-rose-600 font-bold"
+                                                                : "text-slate-300 font-normal"
+                                                        }`}
+                                                    >
+                                                        {hasScore ? scoreNum.toFixed(0) : "--"}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Footer: Descriptor & Final Grade */}
+                                    <div className="flex items-center justify-between pt-1 text-xs">
+                                        <span className="text-[11px] font-medium text-slate-500">
+                                            {g.descriptor || (isPassed ? "Passed" : "In Progress")}
+                                        </span>
+
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                                                Final:
+                                            </span>
+                                            <span className="text-sm font-mono font-black text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                                {g.final_grade !== null && g.final_grade !== undefined
+                                                    ? Number(g.final_grade).toFixed(2)
+                                                    : "--"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* 💻 DESKTOP & PRINT VIEW: Full Official DepEd Form 138 / SF9 Grade Table (Hidden on mobile) */}
+                    <Card className="hidden md:block rounded-2xl border border-slate-200/80 p-0 overflow-hidden bg-white shadow-xs print:block">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse text-xs">
                                 <thead>
@@ -236,29 +354,31 @@ export default function Grades({
                     </Card>
 
                     {/* 🌟 DepEd Observed Values (SF9 Core Values) */}
-                    <Card className="rounded-2xl border border-slate-200/80 p-5 bg-white shadow-xs space-y-3">
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                            <h3 className="font-black text-sm text-slate-900 flex items-center gap-2">
-                                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                                Report on Learner's Observed Values (Core Values)
+                    <Card className="rounded-2xl border border-slate-200/80 p-4 sm:p-5 bg-white shadow-xs space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-100 gap-1.5">
+                            <h3 className="font-black text-xs sm:text-sm text-slate-900 flex items-center gap-2">
+                                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                                <span>Report on Learner's Observed Values (Core Values)</span>
                             </h3>
                             <span className="text-[10px] text-slate-400 font-medium">
-                                AO = Always Observed &bull; SO = Sometimes Observed &bull; NO = Not Observed
+                                AO = Always Observed &bull; SO = Sometimes &bull; NO = Not Observed
                             </span>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                             {coreValues.map((cv, idx) => (
-                                <div key={idx} className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-                                    <span className="font-black text-slate-900">{cv.coreValue}</span>
-                                    {cv.statements.map((stmt, sIdx) => (
-                                        <div key={sIdx} className="flex items-center justify-between text-slate-600 text-[11px]">
-                                            <span className="leading-snug pr-2">&bull; {stmt}</span>
-                                            <span className="font-mono font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded text-[10px]">
-                                                {cv.q1}
-                                            </span>
-                                        </div>
-                                    ))}
+                                <div key={idx} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
+                                    <span className="font-black text-xs text-slate-900 block">{cv.coreValue}</span>
+                                    <div className="space-y-1.5">
+                                        {cv.statements.map((stmt, sIdx) => (
+                                            <div key={sIdx} className="flex items-start justify-between text-slate-600 text-[11px] gap-2">
+                                                <span className="leading-snug flex-1">&bull; {stmt}</span>
+                                                <span className="font-mono font-bold text-emerald-800 bg-emerald-100 border border-emerald-200/60 px-2 py-0.5 rounded text-[10px] shrink-0">
+                                                    {cv.q1}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             ))}
                         </div>

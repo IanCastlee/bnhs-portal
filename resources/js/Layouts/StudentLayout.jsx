@@ -19,6 +19,7 @@ import {
     ChevronRight,
     ChevronDown,
     Lock,
+    Settings,
 } from "lucide-react";
 export default function StudentLayout({ children, title = "Student Portal" }) {
     const { user } = useAuth();
@@ -27,6 +28,12 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
     const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile drawer
     const [isCollapsed, setIsCollapsed] = useState(false); // Desktop collapse/expand
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+    const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
+
+    // Auto-close mobile dropdown on page navigation
+    useEffect(() => {
+        setMobileDropdownOpen(false);
+    }, [url]);
 
     // Safe Dynamic Active School Year Label
     const getActiveYearLabel = () => {
@@ -75,6 +82,12 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                           name: "My Profile & LRN",
                           href: "/student/profile",
                           icon: UserCircle,
+                          isLocked: false,
+                      },
+                      {
+                          name: "Account Settings",
+                          href: "/student/profile",
+                          icon: Settings,
                           isLocked: false,
                       },
                   ],
@@ -141,6 +154,12 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                           name: "My Profile & LRN",
                           href: "/student/profile",
                           icon: UserCircle,
+                          isLocked: false,
+                      },
+                      {
+                          name: "Account Settings",
+                          href: "/student/profile",
+                          icon: Settings,
                           isLocked: false,
                       },
                   ],
@@ -322,6 +341,13 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                                         {user?.email}
                                     </span>
                                 </div>
+                                <Link
+                                    href="/student/profile"
+                                    className="w-full text-left px-2 py-1.5 rounded text-slate-200 hover:bg-[#243556] hover:text-emerald-300 flex items-center gap-2 transition cursor-pointer font-medium"
+                                >
+                                    <Settings className="w-3.5 h-3.5 text-emerald-400" />
+                                    <span>Account Settings</span>
+                                </Link>
                                 <button
                                     onClick={handleLogout}
                                     className="w-full text-left px-2 py-1.5 rounded text-rose-300 hover:bg-rose-500/20 hover:text-rose-200 flex items-center gap-2 transition cursor-pointer font-medium"
@@ -481,18 +507,158 @@ export default function StudentLayout({ children, title = "Student Portal" }) {
                     </div>
                 </div>
 
-                {/* Mobile Right Controls: Notification Bell + Log Out */}
-                <div className="flex items-center gap-1.5">
+                {/* Mobile Right Controls: Notification Bell + User Menu Dropdown */}
+                <div className="flex items-center gap-2">
                     <NotificationBell isDark={true} />
 
-                    <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="p-1.5 rounded-lg text-emerald-200 hover:text-rose-300 hover:bg-rose-500/20 transition cursor-pointer"
-                        title="Log Out"
-                    >
-                        <LogOut className="w-4 h-4" />
-                    </button>
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={() => setMobileDropdownOpen((prev) => !prev)}
+                            className="flex items-center gap-1 p-0.5 rounded-full hover:bg-white/10 transition cursor-pointer focus:outline-none"
+                            title="Account & Settings"
+                            aria-expanded={mobileDropdownOpen}
+                        >
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-300 flex items-center justify-center text-slate-950 font-bold text-xs overflow-hidden ring-1.5 ring-white/40 shadow-xs">
+                                {user?.avatar_path ? (
+                                    <img
+                                        src={user.avatar_path}
+                                        alt={user?.name || "Student"}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <span>{user?.name?.charAt(0) || "S"}</span>
+                                )}
+                            </div>
+                            <ChevronDown
+                                className={`w-3 h-3 text-emerald-200 transition-transform duration-200 ${
+                                    mobileDropdownOpen ? "rotate-180 text-white" : ""
+                                }`}
+                            />
+                        </button>
+
+                        {/* Backdrop overlay for closing */}
+                        {mobileDropdownOpen && (
+                            <div
+                                className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-[1px]"
+                                onClick={() => setMobileDropdownOpen(false)}
+                            />
+                        )}
+
+                        {/* Dropdown Menu Popover */}
+                        {mobileDropdownOpen && (
+                            <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-slate-800">
+                                {/* 1. Student Identity Header Box */}
+                                <div className="p-4 bg-gradient-to-br from-[#062d21] via-[#0b4635] to-[#062d21] text-white">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-300 flex items-center justify-center text-slate-950 font-black text-sm shrink-0 ring-2 ring-emerald-300/40 overflow-hidden shadow-md">
+                                            {user?.avatar_path ? (
+                                                <img
+                                                    src={user.avatar_path}
+                                                    alt={user?.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <span>{user?.name?.charAt(0) || "S"}</span>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-extrabold text-xs text-white truncate">
+                                                {user?.name || "Student"}
+                                            </p>
+                                            <p className="text-[11px] text-emerald-200/80 truncate font-mono">
+                                                {user?.email}
+                                            </p>
+                                            <div className="flex items-center gap-1.5 mt-1">
+                                                <span className="font-mono text-[10px] bg-white/15 border border-white/20 text-emerald-100 px-1.5 py-0.5 rounded font-semibold">
+                                                    LRN: {user?.lrn || "None"}
+                                                </span>
+                                                <span
+                                                    className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                                                        isPending
+                                                            ? "bg-amber-400 text-amber-950"
+                                                            : "bg-emerald-400 text-slate-950"
+                                                    }`}
+                                                >
+                                                    {isPending ? "Applicant" : "Enrolled"}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 2. Action Menu Links */}
+                                <div className="p-2 space-y-1">
+                                    <Link
+                                        href="/student/profile"
+                                        onClick={() => setMobileDropdownOpen(false)}
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-900 transition-colors group"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-200/70 transition-colors">
+                                            <UserCircle className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-bold text-slate-900 group-hover:text-emerald-950">
+                                                My Profile &amp; LRN
+                                            </p>
+                                            <p className="text-[10px] text-slate-500 truncate">
+                                                Demographics, address, and ID photo
+                                            </p>
+                                        </div>
+                                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-transform group-hover:translate-x-0.5 shrink-0" />
+                                    </Link>
+
+                                    <Link
+                                        href="/student/profile"
+                                        onClick={() => setMobileDropdownOpen(false)}
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors group"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 group-hover:bg-slate-200 transition-colors">
+                                            <Settings className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-bold text-slate-900">
+                                                Account Settings
+                                            </p>
+                                            <p className="text-[10px] text-slate-500 truncate">
+                                                Manage password and credentials
+                                            </p>
+                                        </div>
+                                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
+                                    </Link>
+
+                                    {/* Academic Year Info Pill */}
+                                    <div className="mx-1 my-1 px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-[10px]">
+                                        <div className="flex items-center gap-1.5 text-slate-600 font-medium">
+                                            <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                            <span>Academic Cycle</span>
+                                        </div>
+                                        <span className="font-bold text-emerald-800">
+                                            {getActiveYearLabel()}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* 3. Sign Out Button Footer */}
+                                <div className="p-2 border-t border-slate-100 bg-slate-50/70">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setMobileDropdownOpen(false);
+                                            handleLogout();
+                                        }}
+                                        className="w-full px-3 py-2.5 rounded-xl text-rose-700 hover:text-rose-800 bg-rose-50/80 hover:bg-rose-100 border border-rose-200/60 font-bold flex items-center justify-between transition-colors cursor-pointer text-xs group"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <LogOut className="w-4 h-4 text-rose-600 group-hover:scale-110 transition-transform" />
+                                            <span>Sign Out / Log Out</span>
+                                        </div>
+                                        <ChevronRight className="w-3.5 h-3.5 text-rose-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </header>
 

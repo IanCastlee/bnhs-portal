@@ -34,6 +34,7 @@ Route::middleware(['auth', 'role:REGISTRAR,ADMIN'])->prefix('registrar')->name('
     //  Class Sectioning
     Route::get('/sectioning', [RegistrarSectioningController::class, 'index'])->name('sectioning.index');
     Route::post('/sectioning/create-section', [RegistrarSectioningController::class, 'createSection'])->name('sectioning.create');
+    Route::put('/sectioning/{section}', [RegistrarSectioningController::class, 'updateSection'])->name('sectioning.update');
     Route::delete('/sectioning/{section}', [RegistrarSectioningController::class, 'deleteSection'])->name('sectioning.delete');
 
     // Section Adviser Assignment

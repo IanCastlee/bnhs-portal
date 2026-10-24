@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
 import Button from "@/Components/Atoms/Common/Button";
+import { toast } from "@/Context/ToastContext";
 import {
     BookOpen,
     Clock,
@@ -59,7 +60,9 @@ export default function ManageSectionSubjectsModal({
             })
             .catch((err) => {
                 if (isMounted) {
-                    setErrorMsg(err.message || "Nagkaroon ng aberya sa pag-load.");
+                    const msg = err.message || "Nagkaroon ng aberya sa pag-load.";
+                    setErrorMsg(msg);
+                    toast.error(msg);
                     setIsLoading(false);
                 }
             });

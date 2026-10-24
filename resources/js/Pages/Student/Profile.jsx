@@ -7,6 +7,7 @@ import { useAuth } from "@/Hooks/useAuth";
 import { useSchoolSettings } from "@/Hooks/useSchoolSettings";
 import { formatLRN } from "@/Utils/formatters";
 import { compressIdPhoto } from "@/Utils/compressImage";
+import { toast } from "@/Context/ToastContext";
 import {
     UserCircle,
     Fingerprint,
@@ -62,9 +63,10 @@ export default function Profile({ enrollment }) {
                 },
             });
         } catch (err) {
-            console.error("Compression/Upload Error:", err);
             setIsUploading(false);
-            setUploadError("Nabigo ang pag-proseso ng larawan.");
+            const errMsg = "Nabigo ang pag-proseso ng larawan.";
+            setUploadError(errMsg);
+            toast.error(errMsg);
         }
     };
 

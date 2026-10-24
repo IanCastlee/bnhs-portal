@@ -3,46 +3,18 @@
 namespace App\Notifications;
 
 use App\Modules\Enrollment\Models\Enrollment;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class EnrollmentRejectedNotification extends Notification implements ShouldQueue
+class EnrollmentRejectedNotification extends Notification
 {
-    use Queueable;
-
-    public int $tries = 3;
-    public int $timeout = 60;
-
     public function __construct(
         public Enrollment $enrollment,
         public string $remarks
-    ) {
-        $this->afterCommit = true;
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
-    }
-
-    public function toMail(object $notifiable): MailMessage
-    {
-        $studentName = $notifiable->name ?? 'Student';
-        $trackingNumber = $this->enrollment->tracking_number;
-        $gradeLevel = $this->enrollment->gradeLevel?->name ?? 'Grade Level';
-        $portalUrl = route('student.admission');
-
-        return (new MailMessage)
-            ->subject("Admission Notice: Action Required for Ticket {$trackingNumber} - Bulusan NHS")
-            ->view('emails.enrollment_rejected', [
-                'studentName'    => $studentName,
-                'trackingNumber' => $trackingNumber,
-                'gradeLevel'     => $gradeLevel,
-                'remarks'        => $this->remarks,
-                'portalUrl'      => $portalUrl,
-            ]);
+        return ['database'];
     }
 
     public function toArray(object $notifiable): array

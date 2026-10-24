@@ -132,7 +132,7 @@ class RegistrarSectioningController extends Controller
         $validated = $request->validate([
             'grade_level_id' => ['required', 'exists:grade_levels,id'],
             'name'           => ['required', 'string', 'max:100'],
-            'capacity'       => ['required', 'integer', 'min:10', 'max:70'],
+            'capacity'       => ['required', 'integer', 'min:1', 'max:150'],
             'adviser_id'     => ['nullable', 'exists:users,id'],
         ]);
 
@@ -204,6 +204,103 @@ class RegistrarSectioningController extends Controller
         }
 
         return back()->with('success', "Matagumpay na nagawa ang Section {$section->name}!");
+    }
+
+    /**
+     * Update an existing Section's details (Name, Capacity, Adviser).
+     */
+    public function updateSection(Request $request, Section $section): RedirectResponse
+    {
+        $this->authorizeGradeLevel((int) $section->grade_level_id);
+
+        $validated = $request->validate([
+            'name'       => ['required', 'string', 'max:100'],
+            'capacity'   => ['required', 'integer', 'min:1', 'max:150'],
+            'adviser_id' => ['nullable', 'exists:users,id'],
+        ]);
+
+        $newName = trim($validated['name']);
+        $newCapacity = (int) $validated['capacity'];
+        $newAdviserId = $validated['adviser_id'] ?? null;
+
+        // Check if name changed and if new name already exists in same grade and school year
+        if (strcasecmp($section->name, $newName) !== 0) {
+            $exists = Section::where('academic_year_id', $section->academic_year_id)
+                ->where('grade_level_id', $section->grade_level_id)
+                ->where('id', '!=', $section->id)
+                ->where('name', $newName)
+                ->exists();
+
+            if ($exists) {
+                return back()->withErrors(['name' => "Mayroon nang Section na nagngangalang '{$newName}' sa Grade Level na ito."]);
+            }
+        }
+
+        // Validate adviser if selected
+        if ($newAdviserId) {
+            $isTeacher = User::where('id', $newAdviserId)
+                ->where('role', UserRole::TEACHER)
+                ->where('is_active', true)
+                ->exists();
+
+            if (!$isTeacher) {
+                return back()->withErrors(['adviser_id' => 'Ang napiling adviser ay dapat isang aktibong faculty teacher.']);
+            }
+        }
+
+        // Safety check on capacity: cannot be lower than current enrolled count
+        $currentEnrollees = $section->enrollments()->where('status', EnrollmentStatus::APPROVED)->count();
+        if ($newCapacity < $currentEnrollees) {
+            return back()->withErrors([
+                'capacity' => "Hindi maaaring gawing {$newCapacity} ang capacity dahil mayroon nang {$currentEnrollees} estudyanteng kasalukuyang naka-enroll sa Section na ito."
+            ]);
+        }
+
+        $oldName = $section->name;
+        $oldAdviserId = $section->adviser_id;
+
+        DB::transaction(function () use ($section, $oldName, $newName, $newCapacity, $newAdviserId, $oldAdviserId) {
+            if ($newAdviserId && $newAdviserId !== $oldAdviserId) {
+                // If this teacher is currently adviser of another section in the same academic year, unassign them first
+                Section::where('academic_year_id', $section->academic_year_id)
+                    ->where('id', '!=', $section->id)
+                    ->where('adviser_id', $newAdviserId)
+                    ->update(['adviser_id' => null]);
+            }
+
+            $section->update([
+                'name'       => $newName,
+                'capacity'   => $newCapacity,
+                'adviser_id' => $newAdviserId,
+            ]);
+
+            AuditLog::record(
+                'SECTION_UPDATED',
+                "Updated section '{$oldName}' to '{$newName}' (Capacity: {$newCapacity})" . ($newAdviserId ? " with Adviser ID {$newAdviserId}" : ""),
+                $section,
+                [
+                    'old_name'   => $oldName,
+                    'new_name'   => $newName,
+                    'capacity'   => $newCapacity,
+                    'adviser_id' => $newAdviserId,
+                ],
+                'SECTION'
+            );
+        });
+
+        // Notify teacher if a new adviser was assigned
+        if ($newAdviserId && $newAdviserId !== $oldAdviserId) {
+            $assignedTeacher = User::find($newAdviserId);
+            if ($assignedTeacher) {
+                $assignedTeacher->notify(new TeacherAdviserAssignedNotification(
+                    $section->fresh(['gradeLevel', 'academicYear']),
+                    $assignedTeacher,
+                    $section->academicYear
+                ));
+            }
+        }
+
+        return back()->with('success', "Matagumpay na na-update ang mga detalye ng Section {$section->name}!");
     }
 
     /**

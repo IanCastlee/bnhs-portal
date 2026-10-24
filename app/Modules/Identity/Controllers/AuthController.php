@@ -21,6 +21,8 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\RateLimiter;
+
 
 class AuthController extends Controller
 {
@@ -60,26 +62,26 @@ class AuthController extends Controller
 
         $user = User::where('email', $normalizedEmail)->first();
 
-        // 🛡️ Timing Attack Mitigation: Constant-time Hash Check
+        //  Timing Attack Mitigation: Constant-time Hash Check
         // If the user does not exist, compute a dummy hash verification so execution time remains identical
         $dummyHash = '$2y$12$eA8i4tJ1FzZJq5N0V1NMe.W8Wj1vD9XF9W7L5K4J3H2G1F0E9D8C7';
         $passwordValid = $user 
             ? Hash::check($credentials['password'], $user->password) 
             : Hash::check($credentials['password'], $dummyHash);
 
-        // 🛡️ Anti-User Enumeration & Credential Verification
+        //  Anti-User Enumeration & Credential Verification
         // Do not leak whether the email exists or password was wrong
         if (!$user || !$passwordValid) {
-            \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 60);
+            RateLimiter::hit($throttleKey, 60);
 
             return back()->withErrors([
                 'email' => 'Invalid email or password. Please verify your credentials and try again.',
             ])->onlyInput('email');
         }
 
-        // 🛡️ Account Status Check (Only verified AFTER password is confirmed)
+        //  Account Status Check (Only verified AFTER password is confirmed)
         if (!$user->is_active) {
-            \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 60);
+            RateLimiter::hit($throttleKey, 60);
 
             return back()->withErrors([
                 'email' => 'This account is currently deactivated. Please contact the Bulusan NHS Administration.',
@@ -87,7 +89,7 @@ class AuthController extends Controller
         }
 
         // 🧼 Successful Authentication: Clear Rate Limiting attempts
-        \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
+        RateLimiter::clear($throttleKey);
 
         // 🔒 Authenticate User & Regenerate Session (Anti-Session Fixation)
         Auth::login($user, $request->boolean('remember'));
@@ -236,7 +238,7 @@ class AuthController extends Controller
             ])->onlyInput('email', 'lrn');
         }
 
-        // 🛡️ 4. Authenticate & Regenerate Session
+        //  4. Authenticate & Regenerate Session
         Auth::login($user);
         $request->session()->regenerate();
 
